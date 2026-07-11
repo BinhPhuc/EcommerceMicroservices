@@ -1,7 +1,9 @@
 package com.binhphuc.product_service.dto.product.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class CreateProductRequest {
   @NotEmpty private String name;
-  @NotNull private int price;
-  @NotNull private int stock;
-  @NotEmpty private String categoryId;
+  @NotNull @Positive private int price;
+  @NotNull @Positive private int stock;
+  @JsonProperty("category_id") @NotEmpty private String categoryId;
 }

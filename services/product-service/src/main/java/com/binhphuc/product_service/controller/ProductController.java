@@ -2,6 +2,7 @@ package com.binhphuc.product_service.controller;
 
 import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
+import com.binhphuc.product_service.service.impl.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/products")
 public class ProductController {
+  private final ProductService productService;
+
   @PostMapping("/create")
   public ResponseEntity<CreateProductResponse>
   createProduct(@RequestBody CreateProductRequest productRequest) {
     log.info("Creating product: {}", productRequest.getName());
-    // Product createdProduct = productService.createProduct(product);
-    return ResponseEntity.ok("hihi");
+    CreateProductResponse response = productService.create(productRequest);
+    return ResponseEntity.accepted().body(response);
   }
 }
