@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
   handleResourceNotFound(ResourceNotFoundException exception,
                          HttpServletRequest request) {
     ErrorResponse response = ErrorResponse.builder()
-                                 .status(HttpStatus.NOT_FOUND.value())
+                                 .statusCode(HttpStatus.NOT_FOUND.value())
                                  .error(HttpStatus.NOT_FOUND.getReasonPhrase())
                                  .message(exception.getMessage())
                                  .path(request.getRequestURI())

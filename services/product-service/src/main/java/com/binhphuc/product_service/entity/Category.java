@@ -21,7 +21,12 @@ import lombok.Setter;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Category extends BaseEntity {
-  @Id @GeneratedValue(strategy = GenerationType.UUID) private String id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  @Column(length = 36)
+  private String id;
+
   private String name;
-  @Column(name = "parent_id") private String parentId;
+
+  @Column(name = "parent_id") private String parentID;
 }
