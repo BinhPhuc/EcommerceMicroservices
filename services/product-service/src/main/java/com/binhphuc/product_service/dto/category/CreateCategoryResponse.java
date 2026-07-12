@@ -1,4 +1,4 @@
-package com.binhphuc.product_service.dto.product.response;
+package com.binhphuc.product_service.dto.category;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

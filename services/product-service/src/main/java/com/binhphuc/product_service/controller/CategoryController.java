@@ -1,8 +1,8 @@
 package com.binhphuc.product_service.controller;
 
 import com.binhphuc.product_service.dto.common.ApiResponse;
-import com.binhphuc.product_service.dto.product.request.CreateCategoryRequest;
-import com.binhphuc.product_service.dto.product.response.CreateCategoryResponse;
+import com.binhphuc.product_service.dto.category.CreateCategoryRequest;
+import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
 import com.binhphuc.product_service.service.impl.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

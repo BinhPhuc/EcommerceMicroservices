@@ -1,7 +1,7 @@
 package com.binhphuc.product_service.service.impl;
 
-import com.binhphuc.product_service.dto.product.request.CreateCategoryRequest;
-import com.binhphuc.product_service.dto.product.response.CreateCategoryResponse;
+import com.binhphuc.product_service.dto.category.CreateCategoryRequest;
+import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
 import com.binhphuc.product_service.entity.Category;
 import com.binhphuc.product_service.exception.ResourceNotFoundException;
 import com.binhphuc.product_service.repository.CategoryRepository;
