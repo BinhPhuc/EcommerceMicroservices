@@ -12,8 +12,12 @@ import lombok.Getter;
 public class ErrorResponse {
   @JsonProperty("status_code")
   private int statusCode;
+
   private String error;
+
   private String message;
+
   private String path;
+
   private Instant timestamp;
 }

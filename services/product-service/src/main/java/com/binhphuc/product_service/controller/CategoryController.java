@@ -23,7 +23,7 @@ public class CategoryController {
   @PostMapping("/create")
   public ResponseEntity<ApiResponse<CreateCategoryResponse>> createCategory(
       @RequestBody CreateCategoryRequest createCategoryRequest) {
-    log.info("Received request to create category: {}", createCategoryRequest);
+    log.info("Create category: {}", createCategoryRequest.getName());
     CreateCategoryResponse response = categoryService.create(createCategoryRequest);
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(ApiResponse.created(response, "Category created successfully"));
