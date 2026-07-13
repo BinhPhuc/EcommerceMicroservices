@@ -1,7 +1,6 @@
 package com.binhphuc.product_service.dto.common;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,7 +12,8 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApiResponse<T> {
-  @JsonProperty("status_code") private int statusCode;
+  @JsonProperty("status_code")
+  private int statusCode;
   private String message;
   private T data;
 

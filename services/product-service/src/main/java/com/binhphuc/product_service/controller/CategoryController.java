@@ -4,7 +4,6 @@ import com.binhphuc.product_service.dto.common.ApiResponse;
 import com.binhphuc.product_service.dto.category.CreateCategoryRequest;
 import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
 import com.binhphuc.product_service.service.CategoryService;
-import com.binhphuc.product_service.service.impl.CategoryServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,11 +21,11 @@ public class CategoryController {
   private final CategoryService categoryService;
 
   @PostMapping("/create")
-  public ResponseEntity<ApiResponse<CreateCategoryResponse>>
-  createCategory(@RequestBody CreateCategoryRequest createCategoryRequest) {
+  public ResponseEntity<ApiResponse<CreateCategoryResponse>> createCategory(
+      @RequestBody CreateCategoryRequest createCategoryRequest) {
     log.info("Received request to create category: {}", createCategoryRequest);
-    CreateCategoryResponse response =
-        categoryService.create(createCategoryRequest);
-    return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(response, "Category created successfully"));
+    CreateCategoryResponse response = categoryService.create(createCategoryRequest);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(ApiResponse.created(response, "Category created successfully"));
   }
 }
