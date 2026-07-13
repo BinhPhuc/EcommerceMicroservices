@@ -5,14 +5,14 @@ import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
 import com.binhphuc.product_service.entity.Category;
 import com.binhphuc.product_service.exception.ResourceNotFoundException;
 import com.binhphuc.product_service.repository.CategoryRepository;
-import com.binhphuc.product_service.service.ICategoryService;
+import com.binhphuc.product_service.service.CategoryService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class CategoryService implements ICategoryService {
+public class CategoryServiceImpl implements CategoryService {
   private final CategoryRepository categoryRepository;
 
   @Override

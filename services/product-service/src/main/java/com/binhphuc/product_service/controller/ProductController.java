@@ -3,7 +3,7 @@ package com.binhphuc.product_service.controller;
 import com.binhphuc.product_service.dto.common.ApiResponse;
 import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
-import com.binhphuc.product_service.service.impl.ProductService;
+import com.binhphuc.product_service.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

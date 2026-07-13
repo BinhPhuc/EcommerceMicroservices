@@ -7,14 +7,14 @@ import com.binhphuc.product_service.entity.Product;
 import com.binhphuc.product_service.exception.ResourceNotFoundException;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.repository.ProductRepository;
-import com.binhphuc.product_service.service.IProductService;
+import com.binhphuc.product_service.service.ProductService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class ProductService implements IProductService {
+public class ProductServiceImpl implements ProductService {
   private final CategoryRepository categoryRepository;
   private final ProductRepository productRepository;
 
