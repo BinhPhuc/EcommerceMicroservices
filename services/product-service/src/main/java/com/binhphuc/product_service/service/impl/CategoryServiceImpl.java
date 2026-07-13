@@ -3,6 +3,7 @@ package com.binhphuc.product_service.service.impl;
 import com.binhphuc.product_service.dto.category.CreateCategoryRequest;
 import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
 import com.binhphuc.product_service.entity.Category;
+import com.binhphuc.product_service.exception.ResourceExistException;
 import com.binhphuc.product_service.exception.ResourceNotFoundException;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.service.CategoryService;
@@ -16,21 +17,27 @@ public class CategoryServiceImpl implements CategoryService {
   private final CategoryRepository categoryRepository;
 
   @Override
-  public CreateCategoryResponse
-  create(CreateCategoryRequest createCategoryRequest) {
+  public CreateCategoryResponse create(CreateCategoryRequest createCategoryRequest) {
+    Optional<Category> existingCategory = categoryRepository.findByName(createCategoryRequest.getName());
+
+    if (!existingCategory.isEmpty()) {
+      throw new ResourceExistException(
+          "Category with name " + createCategoryRequest.getName() +
+              " already exists");
+    }
+
     Category newCategory = Category.builder()
-                               .name(createCategoryRequest.getName())
-                               .parentID(createCategoryRequest.getParentID())
-                               .build();
+        .name(createCategoryRequest.getName())
+        .parentID(createCategoryRequest.getParentID())
+        .build();
     if (createCategoryRequest.getParentID().isEmpty()) {
       newCategory.setParentID(null);
     } else {
-      Optional<Category> parentCategory =
-          categoryRepository.findById(createCategoryRequest.getParentID());
+      Optional<Category> parentCategory = categoryRepository.findById(createCategoryRequest.getParentID());
       if (parentCategory.isEmpty()) {
         throw new ResourceNotFoundException(
             "Parent category with ID " + createCategoryRequest.getParentID() +
-            " not found");
+                " not found");
       }
     }
     Category savedCategory = categoryRepository.save(newCategory);
