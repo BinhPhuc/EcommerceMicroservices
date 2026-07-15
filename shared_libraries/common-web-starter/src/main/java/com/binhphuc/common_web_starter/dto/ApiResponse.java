@@ -1,4 +1,4 @@
-package com.binhphuc.product_service.dto.common;
+package com.binhphuc.common_web_starter.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

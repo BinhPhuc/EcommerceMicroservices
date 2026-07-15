@@ -1,4 +1,4 @@
-package com.binhphuc.product_service.exception;
+package com.binhphuc.common_web_starter.exception;
 
 public class ResourceExistException extends RuntimeException {
   public ResourceExistException(String message) {

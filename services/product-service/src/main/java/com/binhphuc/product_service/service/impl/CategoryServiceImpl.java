@@ -1,10 +1,10 @@
 package com.binhphuc.product_service.service.impl;
 
+import com.binhphuc.common_web_starter.exception.ResourceExistException;
+import com.binhphuc.common_web_starter.exception.ResourceNotFoundException;
 import com.binhphuc.product_service.dto.category.CreateCategoryRequest;
 import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
 import com.binhphuc.product_service.entity.Category;
-import com.binhphuc.product_service.exception.ResourceExistException;
-import com.binhphuc.product_service.exception.ResourceNotFoundException;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.service.CategoryService;
 import java.util.Optional;

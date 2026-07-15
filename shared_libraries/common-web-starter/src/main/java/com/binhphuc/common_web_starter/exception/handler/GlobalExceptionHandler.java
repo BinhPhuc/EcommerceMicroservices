@@ -1,13 +1,15 @@
-package com.binhphuc.product_service.exception.handler;
+package com.binhphuc.common_web_starter.exception.handler;
 
-import com.binhphuc.product_service.dto.common.ErrorResponse;
-import com.binhphuc.product_service.exception.ResourceExistException;
-import com.binhphuc.product_service.exception.ResourceNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import com.binhphuc.common_web_starter.dto.ErrorResponse;
+import com.binhphuc.common_web_starter.exception.ResourceExistException;
+import com.binhphuc.common_web_starter.exception.ResourceNotFoundException;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
