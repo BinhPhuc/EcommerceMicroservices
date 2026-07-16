@@ -1,5 +1,6 @@
 package com.binhphuc.product_service.entity;
 
+import com.binhphuc.common_jpa_starter.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

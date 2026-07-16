@@ -1,6 +1,6 @@
 package com.binhphuc.product_service.controller;
 
-import com.binhphuc.product_service.dto.common.ApiResponse;
+import com.binhphuc.common_web_starter.dto.ApiResponse;
 import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.service.ProductService;
@@ -21,10 +21,11 @@ public class ProductController {
   private final ProductService productService;
 
   @PostMapping("/create")
-  public ResponseEntity<ApiResponse<CreateProductResponse>>
-  createProduct(@RequestBody CreateProductRequest productRequest) {
+  public ResponseEntity<ApiResponse<CreateProductResponse>> createProduct(
+      @RequestBody CreateProductRequest productRequest) {
     log.info("Creating product: {}", productRequest.getName());
     CreateProductResponse response = productService.create(productRequest);
-    return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(response, "Product created successfully"));
+    return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(response,
+        "Product created successfully"));
   }
 }

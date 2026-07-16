@@ -1,6 +1,6 @@
 package com.binhphuc.product_service.controller;
 
-import com.binhphuc.product_service.dto.common.ApiResponse;
+import com.binhphuc.common_web_starter.dto.ApiResponse;
 import com.binhphuc.product_service.dto.category.CreateCategoryRequest;
 import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
 import com.binhphuc.product_service.service.CategoryService;
