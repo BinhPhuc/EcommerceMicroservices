@@ -1,6 +1,7 @@
-package com.binhphuc.product_service.entity;
+package com.binhphuc.order_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,21 +14,22 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@Table(name = "products")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "order_items")
+@NoArgsConstructor
 @AllArgsConstructor
-public class Product extends BaseEntity {
+public class OrderItem extends BaseEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   @Column(length = 36)
   private String id;
 
-  private String name;
+  @Column(name = "order_id", length = 36, nullable = false)
+  private String orderID;
+
+  @Column(name = "product_id", length = 36, nullable = false)
+  private String productID;
 
   private Integer price;
 
-  private Integer stock;
-
-  @Column(name = "category_id", length = 36, nullable = false)
-  private String categoryId;
+  private Integer quantity;
 }
