@@ -59,6 +59,10 @@
 			<scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+    <dependency>
       <groupId>com.binhphuc</groupId>
       <artifactId>common_web_starter</artifactId>
       <version>0.0.1-SNAPSHOT</version>

@@ -7,3 +7,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+
+services:
+  product:
+    base-url: http://localhost:8081
+    timeout: 5s
