@@ -3,6 +3,8 @@ package com.binhphuc.product_service.service.impl;
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
 import com.binhphuc.product_service.dto.product.request.GetProductByIdsRequest;
+import com.binhphuc.product_service.dto.product.request.UpdateProductStockRequest;
+import com.binhphuc.product_service.dto.product.request.UpdateProductStockRequest.UpdateFilter;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
 import com.binhphuc.product_service.entity.Category;
@@ -10,6 +12,8 @@ import com.binhphuc.product_service.entity.Product;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.repository.ProductRepository;
 import com.binhphuc.product_service.service.ProductService;
+
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,5 +66,20 @@ public class ProductServiceImpl implements ProductService {
                         .build())
                 .toList();
         return responseList;
+    }
+
+    @Override
+    @Transactional
+    public void updateStock(UpdateProductStockRequest updateProductStockRequest) {
+        for (UpdateFilter updateRequest : updateProductStockRequest.getProducts()) {
+            Optional<Product> productOptional = productRepository.findById(updateRequest.getProductId());
+            if (productOptional.isEmpty()) {
+                throw new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " + updateRequest
+                        .getProductId());
+            }
+            Product product = productOptional.get();
+            product.setStock(product.getStock() - updateRequest.getQuantity());
+            productRepository.save(product);
+        }
     }
 }
