@@ -1,7 +1,16 @@
 package com.binhphuc.order_service.service.impl;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.binhphuc.common_web_starter.exception.BusinessException;
+import com.binhphuc.order_service.client.product.ProductClient;
+import com.binhphuc.order_service.client.product.dto.request.GetProductByIdsRequest;
+import com.binhphuc.order_service.client.product.dto.response.GetProductByIdsResponse;
 import com.binhphuc.order_service.dto.order.request.CreateOrderItemRequest;
 import com.binhphuc.order_service.dto.order.request.CreateOrderRequest;
 import com.binhphuc.order_service.dto.order.response.CreateOrderResponse;
@@ -12,40 +21,72 @@ import com.binhphuc.order_service.repository.OrderItemRepository;
 import com.binhphuc.order_service.repository.OrderRepository;
 import com.binhphuc.order_service.service.OrderService;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-  private final OrderRepository orderRepository;
-  private final OrderItemRepository orderItemRepository;
+    private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final ProductClient productClient;
 
-  @Override
-  public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
-    Order newOrder = new Order();
-    // TODO: validate order request later
-    int totalAmount = 0;
-    newOrder.setStatus(OrderStatus.PENDING);
-    newOrder.setCustomerID(createOrderRequest.getCustomerID());
-    for (CreateOrderItemRequest orderItemRequest : createOrderRequest.getOrderItems()) {
-      // TODO: get order item price from product service later
-      // totalAmount += orderItemRequest.getPrice() * orderItemRequest.getQuantity();
-      totalAmount += 100 * orderItemRequest.getQuantity(); // hardcode for now
+    @Override
+    @Transactional
+    public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
+        List<String> productIds = createOrderRequest
+                .getOrderItems()
+                .stream()
+                .map(CreateOrderItemRequest::getProductId)
+                .toList();
+        List<GetProductByIdsResponse> getProductByIdsResponses = productClient
+                .getProductsByIds(GetProductByIdsRequest.builder().productIds(productIds).build());
+
+        Map<String, GetProductByIdsResponse> productIdMap = getProductByIdsResponses
+                .stream()
+                .collect(Collectors.toMap(GetProductByIdsResponse::getId, product -> product));
+
+        Order newOrder = new Order();
+        newOrder.setStatus(OrderStatus.PENDING);
+        newOrder.setCustomerId(createOrderRequest.getCustomerId());
+        newOrder.setTotalAmount(0);
+        Order savedOrder = orderRepository.save(newOrder);
+
+        int totalAmount = 0;
+        for (CreateOrderItemRequest orderItemRequest : createOrderRequest.getOrderItems()) {
+            GetProductByIdsResponse product = productIdMap.get(orderItemRequest.getProductId());
+            if (product == null) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product with id " +
+                        orderItemRequest.getProductId() + " not found");
+            }
+
+            Integer quantity = orderItemRequest.getQuantity();
+            Integer stock = product.getStock();
+
+            if (stock < quantity) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
+                        " is out of stock");
+            }
+
+            Integer price = product.getPrice();
+            totalAmount += quantity * price;
+
+            OrderItem newOrderItem = OrderItem
+                    .builder()
+                    .orderId(savedOrder.getId())
+                    .productId(product.getId())
+                    .quantity(quantity)
+                    .build();
+            orderItemRepository.save(newOrderItem);
+        }
+
+        savedOrder.setTotalAmount(totalAmount);
+        orderRepository.save(savedOrder);
+
+        return CreateOrderResponse
+                .builder()
+                .status(savedOrder.getStatus())
+                .totalAmount(savedOrder.getTotalAmount())
+                .build();
     }
-    newOrder.setTotalAmount(totalAmount);
-    Order savedOrder = orderRepository.save(newOrder);
-    String newOrderID = savedOrder.getId();
-    for (CreateOrderItemRequest orderItemRequest : createOrderRequest.getOrderItems()) {
-      OrderItem newOrderItem = OrderItem.builder()
-          .orderID(newOrderID)
-          .productID(orderItemRequest.getProductID())
-          .quantity(orderItemRequest.getQuantity())
-          .build();
-      orderItemRepository.save(newOrderItem);
-    }
-    return CreateOrderResponse.builder()
-        .status(savedOrder.getStatus())
-        .totalAmount(savedOrder.getTotalAmount())
-        .build();
-  }
 }

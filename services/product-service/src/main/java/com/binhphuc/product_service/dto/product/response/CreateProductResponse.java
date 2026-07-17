@@ -12,5 +12,5 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateProductResponse {
-  private String name;
+    private String name;
 }
