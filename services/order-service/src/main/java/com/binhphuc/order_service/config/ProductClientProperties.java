@@ -15,6 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductClientProperties {
-  private String baseUrl;
-  private Duration timeout;
+    private String baseUrl;
+    private Duration timeout;
 }

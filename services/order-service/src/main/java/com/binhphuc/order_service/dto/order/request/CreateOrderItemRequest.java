@@ -15,11 +15,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateOrderItemRequest {
-  @NotEmpty
-  @JsonProperty("product_id")
-  private String productID;
+    @NotEmpty
+    @JsonProperty("product_id")
+    private String productId;
 
-  @NotNull
-  @Positive
-  private Integer quantity;
+    @NotNull
+    @Positive
+    private Integer quantity;
 }

@@ -17,20 +17,20 @@ import reactor.netty.http.client.HttpClient;
 @Configuration
 @EnableConfigurationProperties(ProductClientProperties.class)
 public class WebClientConfig {
-  @Bean
-  public WebClient productClient(ProductClientProperties properties) {
-    HttpClient httpClient = HttpClient
-        .create()
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
-        .responseTimeout(properties.getTimeout())
-        .doOnConnected(conn -> conn
-            .addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
-            .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
+    @Bean
+    public WebClient productClient(ProductClientProperties properties) {
+        HttpClient httpClient = HttpClient
+                .create()
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
+                .responseTimeout(properties.getTimeout())
+                .doOnConnected(conn -> conn
+                        .addHandlerLast(new ReadTimeoutHandler(5000, TimeUnit.MILLISECONDS))
+                        .addHandlerLast(new WriteTimeoutHandler(5000, TimeUnit.MILLISECONDS)));
 
-    return WebClient
-        .builder()
-        .baseUrl(properties.getBaseUrl())
-        .clientConnector(new ReactorClientHttpConnector(httpClient))
-        .build();
-  }
+        return WebClient
+                .builder()
+                .baseUrl(properties.getBaseUrl())
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+    }
 }

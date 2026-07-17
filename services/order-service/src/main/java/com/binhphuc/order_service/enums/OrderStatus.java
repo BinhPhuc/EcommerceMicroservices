@@ -1,7 +1,7 @@
 package com.binhphuc.order_service.enums;
 
 public enum OrderStatus {
-  PENDING,
-  COMPLETED,
-  CANCELED
+    PENDING,
+    COMPLETED,
+    CANCELED
 }

@@ -20,13 +20,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/orders")
 public class OrderController {
-  private final OrderService orderService;
+    private final OrderService orderService;
 
-  @PostMapping("/create")
-  public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(
-      @RequestBody CreateOrderRequest createOrderRequest) {
-    log.info("Received request to create order: {}", createOrderRequest);
-    CreateOrderResponse response = orderService.createOrder(createOrderRequest);
-    return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.created(response, "Create order successfully"));
-  }
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(
+                                                                        @RequestBody CreateOrderRequest createOrderRequest) {
+        log.info("Received request to create order: {}", createOrderRequest);
+        CreateOrderResponse response = orderService.createOrder(createOrderRequest);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Create order successfully"));
+    }
 }

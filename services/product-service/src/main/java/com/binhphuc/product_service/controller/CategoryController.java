@@ -1,8 +1,8 @@
 package com.binhphuc.product_service.controller;
 
 import com.binhphuc.common_web_starter.dto.ApiResponse;
-import com.binhphuc.product_service.dto.category.CreateCategoryRequest;
-import com.binhphuc.product_service.dto.category.CreateCategoryResponse;
+import com.binhphuc.product_service.dto.category.request.CreateCategoryRequest;
+import com.binhphuc.product_service.dto.category.response.CreateCategoryResponse;
 import com.binhphuc.product_service.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/categories")
 public class CategoryController {
-  private final CategoryService categoryService;
+    private final CategoryService categoryService;
 
-  @PostMapping("/create")
-  public ResponseEntity<ApiResponse<CreateCategoryResponse>> createCategory(
-      @RequestBody CreateCategoryRequest createCategoryRequest) {
-    log.info("Create category: {}", createCategoryRequest.getName());
-    CreateCategoryResponse response = categoryService.create(createCategoryRequest);
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(ApiResponse.created(response, "Category created successfully"));
-  }
+    @PostMapping("/create")
+    public ResponseEntity<ApiResponse<CreateCategoryResponse>> createCategory(
+                                                                              @RequestBody CreateCategoryRequest createCategoryRequest) {
+        log.info("Create category: {}", createCategoryRequest.getName());
+        CreateCategoryResponse response = categoryService.create(createCategoryRequest);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.created(response, "Category created successfully"));
+    }
 }

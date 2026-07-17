@@ -21,18 +21,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order extends BaseEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(length = 36)
-  private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(length = 36)
+    private String id;
 
-  @Column(name = "customer_id", length = 36, nullable = false)
-  private String customerID;
+    @Column(name = "customer_id", length = 36, nullable = false)
+    private String customerId;
 
-  @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private OrderStatus status;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderStatus status;
 
-  @Column(name = "total_amount", nullable = false)
-  private Integer totalAmount;
+    @Column(name = "total_amount", nullable = false)
+    private Integer totalAmount;
 }
