@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.order_service.client.product.ProductClient;
 import com.binhphuc.order_service.client.product.dto.request.GetProductByIdsRequest;
+import com.binhphuc.order_service.client.product.dto.request.UpdateProductStockRequest;
+import com.binhphuc.order_service.client.product.dto.request.UpdateProductStockRequest.UpdateFilter;
 import com.binhphuc.order_service.client.product.dto.response.GetProductByIdsResponse;
 import com.binhphuc.order_service.dto.order.request.CreateOrderItemRequest;
 import com.binhphuc.order_service.dto.order.request.CreateOrderRequest;
@@ -69,6 +71,11 @@ public class OrderServiceImpl implements OrderService {
             }
 
             Integer price = product.getPrice();
+            if (price == null) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
+                        " has no price");
+            }
+
             totalAmount += quantity * price;
 
             OrderItem newOrderItem = OrderItem
@@ -76,12 +83,25 @@ public class OrderServiceImpl implements OrderService {
                     .orderId(savedOrder.getId())
                     .productId(product.getId())
                     .quantity(quantity)
+                    .price(price)
                     .build();
             orderItemRepository.save(newOrderItem);
         }
 
         savedOrder.setTotalAmount(totalAmount);
         orderRepository.save(savedOrder);
+
+        List<UpdateFilter> updateFilters = createOrderRequest
+                .getOrderItems()
+                .stream()
+                .map(orderItemRequest -> UpdateFilter
+                        .builder()
+                        .productId(orderItemRequest.getProductId())
+                        .quantity(orderItemRequest.getQuantity())
+                        .build())
+                .toList();
+
+        productClient.updateProductStock(UpdateProductStockRequest.builder().products(updateFilters).build());
 
         return CreateOrderResponse
                 .builder()

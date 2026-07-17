@@ -11,6 +11,7 @@ import com.binhphuc.common_web_starter.dto.ApiResponse;
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.order_service.client.product.ProductClient;
 import com.binhphuc.order_service.client.product.dto.request.GetProductByIdsRequest;
+import com.binhphuc.order_service.client.product.dto.request.UpdateProductStockRequest;
 import com.binhphuc.order_service.client.product.dto.response.GetProductByIdsResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -36,5 +37,23 @@ public class ProductClientImpl implements ProductClient {
             throw new BusinessException(HttpStatus.valueOf(response.getStatusCode()), response.getMessage());
         }
         return response.getData();
+    }
+
+    @Override
+    public void updateProductStock(UpdateProductStockRequest updateProductStockRequest) {
+        ApiResponse<Void> response = productClient
+                .patch()
+                .uri("/products/update-stock")
+                .bodyValue(updateProductStockRequest)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ApiResponse<Void>>() {})
+                .block();
+        if (response == null) {
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "Product service is not available");
+        }
+        HttpStatus responseStatus = HttpStatus.valueOf(response.getStatusCode());
+        if (!responseStatus.is2xxSuccessful()) {
+            throw new BusinessException(responseStatus, response.getMessage());
+        }
     }
 }
