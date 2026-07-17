@@ -15,8 +15,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateOrderResponse {
-  private OrderStatus status;
+    private OrderStatus status;
 
-  @JsonProperty("total_amount")
-  private Integer totalAmount;
+    @JsonProperty("total_amount")
+    private Integer totalAmount;
 }

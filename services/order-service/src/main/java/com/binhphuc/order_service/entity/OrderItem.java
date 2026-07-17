@@ -18,18 +18,18 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItem extends BaseEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(length = 36)
-  private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(length = 36)
+    private String id;
 
-  @Column(name = "order_id", length = 36, nullable = false)
-  private String orderID;
+    @Column(name = "order_id", length = 36, nullable = false)
+    private String orderId;
 
-  @Column(name = "product_id", length = 36, nullable = false)
-  private String productID;
+    @Column(name = "product_id", length = 36, nullable = false)
+    private String productId;
 
-  private Integer price;
+    private Integer price;
 
-  private Integer quantity;
+    private Integer quantity;
 }

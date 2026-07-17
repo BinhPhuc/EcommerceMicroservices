@@ -4,5 +4,5 @@ import com.binhphuc.order_service.dto.order.request.CreateOrderRequest;
 import com.binhphuc.order_service.dto.order.response.CreateOrderResponse;
 
 public interface OrderService {
-  CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest);
+    CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest);
 }

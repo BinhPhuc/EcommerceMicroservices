@@ -17,17 +17,17 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Product extends BaseEntity {
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
-  @Column(length = 36)
-  private String id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(length = 36)
+    private String id;
 
-  private String name;
+    private String name;
 
-  private Integer price;
+    private Integer price;
 
-  private Integer stock;
+    private Integer stock;
 
-  @Column(name = "category_id", length = 36, nullable = false)
-  private String categoryId;
+    @Column(name = "category_id", length = 36, nullable = false)
+    private String categoryId;
 }

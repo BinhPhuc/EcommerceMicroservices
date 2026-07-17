@@ -14,8 +14,18 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateProductRequest {
-  @NotEmpty private String name;
-  @NotNull @Positive private int price;
-  @NotNull @Positive private int stock;
-  @JsonProperty("category_id") @NotEmpty private String categoryId;
+    @NotEmpty
+    private String name;
+
+    @NotNull
+    @Positive
+    private int price;
+
+    @NotNull
+    @Positive
+    private int stock;
+
+    @JsonProperty("category_id")
+    @NotEmpty
+    private String categoryId;
 }

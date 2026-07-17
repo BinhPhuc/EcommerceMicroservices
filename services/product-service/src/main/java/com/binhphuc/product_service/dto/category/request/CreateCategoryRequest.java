@@ -1,4 +1,4 @@
-package com.binhphuc.product_service.dto.category;
+package com.binhphuc.product_service.dto.category.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
@@ -12,6 +12,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateCategoryRequest {
-  @NotEmpty private String name;
-  @JsonProperty("parent_id") @NotEmpty private String parentID;
+    @NotEmpty
+    private String name;
+
+    @JsonProperty("parent_id")
+    @NotEmpty
+    private String parentId;
 }
