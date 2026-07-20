@@ -10,7 +10,9 @@ import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse
 import com.binhphuc.product_service.entity.Category;
 import com.binhphuc.product_service.entity.Product;
 import com.binhphuc.product_service.kafka.event.OrderCreatedEvent;
+import com.binhphuc.product_service.kafka.event.ProductLockedEvent;
 import com.binhphuc.product_service.kafka.event.OrderCreatedEvent.OrderItemEvent;
+import com.binhphuc.product_service.kafka.producer.ProductEventProducer;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.repository.ProductRepository;
 import com.binhphuc.product_service.service.ProductService;
@@ -30,6 +32,7 @@ import org.springframework.stereotype.Service;
 public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
+    private final ProductEventProducer productEventProducer;
 
     @Override
     public CreateProductResponse create(CreateProductRequest productRequest) {
@@ -100,5 +103,10 @@ public class ProductServiceImpl implements ProductService {
             products.add(product);
         }
         productRepository.saveAll(products);
+        productEventProducer
+                .sendLockProductStockEvent(ProductLockedEvent
+                        .builder()
+                        .orderId(orderCreatedEvent.getOrderId())
+                        .build());
     }
 }

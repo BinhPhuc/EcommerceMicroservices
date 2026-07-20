@@ -26,5 +26,6 @@ public class OrderCreatedEvent {
         private int quantity;
     }
 
+    private String orderId;
     private List<OrderItemEvent> orderItems;
 }
