@@ -9,12 +9,15 @@ import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
 import com.binhphuc.product_service.entity.Category;
 import com.binhphuc.product_service.entity.Product;
+import com.binhphuc.product_service.kafka.event.OrderCreatedEvent;
+import com.binhphuc.product_service.kafka.event.OrderCreatedEvent.OrderItemEvent;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.repository.ProductRepository;
 import com.binhphuc.product_service.service.ProductService;
 
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -81,5 +84,21 @@ public class ProductServiceImpl implements ProductService {
             product.setStock(product.getStock() - updateRequest.getQuantity());
             productRepository.save(product);
         }
+    }
+
+    @Override
+    public void updateStock(OrderCreatedEvent orderCreatedEvent) {
+        List<Product> products = new ArrayList<>();
+        for (OrderItemEvent orderItem : orderCreatedEvent.getOrderItems()) {
+            Optional<Product> productOptional = productRepository.findById(orderItem.getProductId());
+            if (productOptional.isEmpty()) {
+                throw new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " + orderItem
+                        .getProductId());
+            }
+            Product product = productOptional.get();
+            product.setStock(product.getStock() - orderItem.getQuantity());
+            products.add(product);
+        }
+        productRepository.saveAll(products);
     }
 }

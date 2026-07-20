@@ -29,7 +29,7 @@ public class ProductController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<CreateProductResponse>> createProduct(
-            @RequestBody CreateProductRequest productRequest) {
+                                                                            @RequestBody CreateProductRequest productRequest) {
         log.info("Creating product: {}", productRequest.getName());
         CreateProductResponse response = productService.create(productRequest);
         return ResponseEntity
@@ -39,7 +39,7 @@ public class ProductController {
 
     @PostMapping("/get-by-ids")
     public ResponseEntity<ApiResponse<List<GetProductByIdsResponse>>> getProductsByIds(
-            @RequestBody GetProductByIdsRequest getProductByIdsRequest) {
+                                                                                       @RequestBody GetProductByIdsRequest getProductByIdsRequest) {
         log.info("Getting products by ids");
         List<GetProductByIdsResponse> response = productService.getProductByIds(getProductByIdsRequest);
         return ResponseEntity.ok(ApiResponse.success(response, "Products retrieved successfully"));
@@ -47,7 +47,7 @@ public class ProductController {
 
     @PatchMapping("/update-stock")
     public ResponseEntity<ApiResponse<Void>> updateProductStock(
-            @RequestBody UpdateProductStockRequest updateProductStockRequest) {
+                                                                @RequestBody UpdateProductStockRequest updateProductStockRequest) {
         log.info("Updating product stock");
         productService.updateStock(updateProductStockRequest);
         return ResponseEntity.ok(ApiResponse.success(null, "Product stock updated successfully"));
