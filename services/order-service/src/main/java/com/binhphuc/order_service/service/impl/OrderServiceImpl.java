@@ -100,6 +100,7 @@ public class OrderServiceImpl implements OrderService {
         orderEventProducer
                 .sendOrderCreatedEvent(OrderCreatedEvent
                         .builder()
+                        .orderId(savedOrder.getId())
                         .orderItems(orderItems
                                 .stream()
                                 .map(orderItem -> OrderItemEvent
@@ -116,5 +117,15 @@ public class OrderServiceImpl implements OrderService {
                 .status(savedOrder.getStatus())
                 .totalAmount(savedOrder.getTotalAmount())
                 .build();
+    }
+
+    @Override
+    public void changeOrderStatus(String orderId, OrderStatus orderStatus) {
+        Order order = orderRepository
+                .findById(orderId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId +
+                        " not found"));
+        order.setStatus(orderStatus);
+        orderRepository.save(order);
     }
 }
