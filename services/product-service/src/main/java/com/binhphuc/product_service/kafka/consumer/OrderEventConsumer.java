@@ -18,7 +18,7 @@ public class OrderEventConsumer {
     @KafkaListener(topics = "order.created.v1")
     public void consumeOrderCreatedEvent(OrderCreatedEvent orderCreatedEvent) {
         log.info("Received OrderCreatedEvent: {}", orderCreatedEvent);
-        productService.updateStock(orderCreatedEvent);
+        productService.lockProductStock(orderCreatedEvent);
 
     }
 }

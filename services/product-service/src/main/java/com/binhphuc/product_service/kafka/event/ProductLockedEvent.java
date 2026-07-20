@@ -14,17 +14,4 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderCreatedEvent {
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    @ToString
-    public static class OrderItemEvent {
-        private String productId;
-        private int quantity;
-    }
-
-    private List<OrderItemEvent> orderItems;
-}
+public class ProductLockedEvent {}

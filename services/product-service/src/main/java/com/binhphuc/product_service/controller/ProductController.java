@@ -45,11 +45,11 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(response, "Products retrieved successfully"));
     }
 
-    @PatchMapping("/update-stock")
-    public ResponseEntity<ApiResponse<Void>> updateProductStock(
-                                                                @RequestBody UpdateProductStockRequest updateProductStockRequest) {
+    @PatchMapping("/lock-product-stock")
+    public ResponseEntity<ApiResponse<Void>> lockProductStock(
+                                                              @RequestBody UpdateProductStockRequest updateProductStockRequest) {
         log.info("Updating product stock");
-        productService.updateStock(updateProductStockRequest);
+        productService.lockProductStock(updateProductStockRequest);
         return ResponseEntity.ok(ApiResponse.success(null, "Product stock updated successfully"));
     }
 }

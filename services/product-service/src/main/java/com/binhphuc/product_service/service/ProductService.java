@@ -14,7 +14,7 @@ public interface ProductService {
 
     List<GetProductByIdsResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest);
 
-    void updateStock(UpdateProductStockRequest updateStockRequest);
+    void lockProductStock(UpdateProductStockRequest updateStockRequest);
 
-    void updateStock(OrderCreatedEvent orderCreatedEvent);
+    void lockProductStock(OrderCreatedEvent orderCreatedEvent);
 }

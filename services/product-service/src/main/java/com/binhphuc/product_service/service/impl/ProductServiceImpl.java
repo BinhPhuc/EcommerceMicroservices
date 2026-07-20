@@ -73,7 +73,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void updateStock(UpdateProductStockRequest updateProductStockRequest) {
+    public void lockProductStock(UpdateProductStockRequest updateProductStockRequest) {
         for (UpdateFilter updateRequest : updateProductStockRequest.getProducts()) {
             Optional<Product> productOptional = productRepository.findById(updateRequest.getProductId());
             if (productOptional.isEmpty()) {
@@ -87,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void updateStock(OrderCreatedEvent orderCreatedEvent) {
+    public void lockProductStock(OrderCreatedEvent orderCreatedEvent) {
         List<Product> products = new ArrayList<>();
         for (OrderItemEvent orderItem : orderCreatedEvent.getOrderItems()) {
             Optional<Product> productOptional = productRepository.findById(orderItem.getProductId());
