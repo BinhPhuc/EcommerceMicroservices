@@ -1,5 +1,6 @@
 package com.binhphuc.order_service.kafka.consumer;
 
+import com.binhphuc.order_service.kafka.event.dto.order.ChangeOrderStatusCommand;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,10 @@ public class ProductLockConsumer {
 
     @KafkaListener(topics = PRODUCT_LOCKED_TOPIC)
     public void consumeOrderCreatedEvent(ProductLockedEvent productLockedEvent) {
-        orderService.changeOrderStatus(productLockedEvent.getOrderId(), OrderStatus.COMPLETED);
+        orderService.changeOrderStatus(ChangeOrderStatusCommand.builder()
+                .orderId(productLockedEvent.getOrderId())
+                .orderStatus(OrderStatus.PREPARED)
+                .build());
     }
 }
 
