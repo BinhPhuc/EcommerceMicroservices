@@ -7,11 +7,14 @@ import com.binhphuc.product_service.dto.product.request.GetProductByIdsRequest;
 import com.binhphuc.product_service.dto.product.request.UpdateProductStockRequest;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
+import com.binhphuc.product_service.kafka.event.OrderCreatedEvent;
 
 public interface ProductService {
     CreateProductResponse create(CreateProductRequest productRequest);
 
     List<GetProductByIdsResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest);
 
-    void updateStock(UpdateProductStockRequest updateStockRequest);
+    void lockProductStock(UpdateProductStockRequest updateStockRequest);
+
+    void lockProductStock(OrderCreatedEvent orderCreatedEvent);
 }
