@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.binhphuc.order_service.kafka.event.dto.order.ChangeOrderStatusCommand;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -16,14 +17,13 @@ import com.binhphuc.order_service.dto.order.request.CreateOrderItemRequest;
 import com.binhphuc.order_service.dto.order.request.CreateOrderRequest;
 import com.binhphuc.order_service.dto.order.response.CreateOrderResponse;
 import com.binhphuc.order_service.entity.Order;
-import com.binhphuc.order_service.entity.OrderItem;
 import com.binhphuc.order_service.enums.OrderStatus;
 import com.binhphuc.order_service.kafka.event.OrderCreatedEvent;
-import com.binhphuc.order_service.kafka.event.OrderCreatedEvent.OrderItemEvent;
 import com.binhphuc.order_service.kafka.producer.OrderEventProducer;
 import com.binhphuc.order_service.repository.OrderItemRepository;
 import com.binhphuc.order_service.repository.OrderRepository;
 import com.binhphuc.order_service.service.OrderService;
+import com.binhphuc.order_service.entity.OrderItem;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -83,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
 
             totalAmount += quantity * price;
 
-            OrderItem newOrderItem = OrderItem
+            com.binhphuc.order_service.entity.OrderItem newOrderItem = com.binhphuc.order_service.entity.OrderItem
                     .builder()
                     .orderId(savedOrder.getId())
                     .productId(product.getId())
@@ -103,7 +103,7 @@ public class OrderServiceImpl implements OrderService {
                         .orderId(savedOrder.getId())
                         .orderItems(orderItems
                                 .stream()
-                                .map(orderItem -> OrderItemEvent
+                                .map(orderItem -> com.binhphuc.order_service.kafka.event.dto.order.OrderItem
                                         .builder()
                                         .productId(orderItem.getProductId())
                                         .quantity(orderItem.getQuantity())
@@ -120,7 +120,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void changeOrderStatus(String orderId, OrderStatus orderStatus) {
+    public void changeOrderStatus(ChangeOrderStatusCommand changeOrderStatusCommand) {
+        String orderId = changeOrderStatusCommand.getOrderId();
+        OrderStatus orderStatus = changeOrderStatusCommand.getOrderStatus();
         Order order = orderRepository
                 .findById(orderId)
                 .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId +

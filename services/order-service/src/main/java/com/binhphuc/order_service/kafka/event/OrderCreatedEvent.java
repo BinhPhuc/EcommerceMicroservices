@@ -2,6 +2,7 @@ package com.binhphuc.order_service.kafka.event;
 
 import java.util.List;
 
+import com.binhphuc.order_service.kafka.event.dto.order.OrderItem;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,16 +15,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class OrderCreatedEvent {
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @Builder
-    public static class OrderItemEvent {
-        private String productId;
-        private int quantity;
-    }
-
     private String orderId;
-    private List<OrderItemEvent> orderItems;
+    private List<OrderItem> orderItems;
 }
