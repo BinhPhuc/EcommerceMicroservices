@@ -3,21 +3,18 @@ package com.binhphuc.product_service.service.impl;
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
 import com.binhphuc.product_service.dto.product.request.GetProductByIdsRequest;
-import com.binhphuc.product_service.dto.product.request.UpdateProductStockRequest;
-import com.binhphuc.product_service.dto.product.request.UpdateProductStockRequest.UpdateFilter;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
 import com.binhphuc.product_service.entity.Category;
 import com.binhphuc.product_service.entity.Product;
 import com.binhphuc.product_service.kafka.event.OrderCreatedEvent;
 import com.binhphuc.product_service.kafka.event.ProductLockedEvent;
-import com.binhphuc.product_service.kafka.event.OrderCreatedEvent.OrderItemEvent;
+import com.binhphuc.product_service.kafka.event.dto.order.OrderItem;
+import com.binhphuc.product_service.kafka.event.dto.product.LockProductStockCommand;
 import com.binhphuc.product_service.kafka.producer.ProductEventProducer;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.repository.ProductRepository;
 import com.binhphuc.product_service.service.ProductService;
-
-import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,12 +34,10 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public CreateProductResponse create(CreateProductRequest productRequest) {
         Optional<Category> categoryOptional = categoryRepository.findById(productRequest.getCategoryId());
-
         if (categoryOptional.isEmpty()) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "Category not found with id: " + productRequest
                     .getCategoryId());
         }
-
         Product newProduct = Product
                 .builder()
                 .name(productRequest.getName())
@@ -50,9 +45,7 @@ public class ProductServiceImpl implements ProductService {
                 .stock(productRequest.getStock())
                 .categoryId(productRequest.getCategoryId())
                 .build();
-
         Product savedProduct = productRepository.save(newProduct);
-
         return CreateProductResponse.builder().name(savedProduct.getName()).build();
     }
 
@@ -75,24 +68,9 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
-    public void lockProductStock(UpdateProductStockRequest updateProductStockRequest) {
-        for (UpdateFilter updateRequest : updateProductStockRequest.getProducts()) {
-            Optional<Product> productOptional = productRepository.findById(updateRequest.getProductId());
-            if (productOptional.isEmpty()) {
-                throw new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " + updateRequest
-                        .getProductId());
-            }
-            Product product = productOptional.get();
-            product.setStock(product.getStock() - updateRequest.getQuantity());
-            productRepository.save(product);
-        }
-    }
-
-    @Override
-    public void lockProductStock(OrderCreatedEvent orderCreatedEvent) {
+    public void lockProductStock(LockProductStockCommand lockProductStockCommand) {
         List<Product> products = new ArrayList<>();
-        for (OrderItemEvent orderItem : orderCreatedEvent.getOrderItems()) {
+        for (OrderItem orderItem : lockProductStockCommand.getOrderItems()) {
             Optional<Product> productOptional = productRepository.findById(orderItem.getProductId());
             if (productOptional.isEmpty()) {
                 throw new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " + orderItem
@@ -106,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
         productEventProducer
                 .sendLockProductStockEvent(ProductLockedEvent
                         .builder()
-                        .orderId(orderCreatedEvent.getOrderId())
+                        .orderId(lockProductStockCommand.getOrderId())
                         .build());
     }
 }
