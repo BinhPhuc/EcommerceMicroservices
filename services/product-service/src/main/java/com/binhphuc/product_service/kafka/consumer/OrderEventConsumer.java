@@ -1,5 +1,6 @@
 package com.binhphuc.product_service.kafka.consumer;
 
+import com.binhphuc.product_service.kafka.event.dto.product.LockProductStockCommand;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,10 @@ public class OrderEventConsumer {
     @KafkaListener(topics = "order.created.v1")
     public void consumeOrderCreatedEvent(OrderCreatedEvent orderCreatedEvent) {
         log.info("Received OrderCreatedEvent: {}", orderCreatedEvent);
-        productService.lockProductStock(orderCreatedEvent);
-
+        LockProductStockCommand lockProductStockCommand = LockProductStockCommand.builder()
+                .orderId(orderCreatedEvent.getOrderId())
+                .orderItems(orderCreatedEvent.getOrderItems())
+                .build();
+        productService.lockProductStock(lockProductStockCommand);
     }
 }
