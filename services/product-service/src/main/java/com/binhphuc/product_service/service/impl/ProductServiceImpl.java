@@ -5,9 +5,7 @@ import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
 import com.binhphuc.product_service.dto.product.request.GetProductByIdsRequest;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
-import com.binhphuc.product_service.entity.Category;
 import com.binhphuc.product_service.entity.Product;
-import com.binhphuc.product_service.kafka.event.OrderCreatedEvent;
 import com.binhphuc.product_service.kafka.event.ProductLockedEvent;
 import com.binhphuc.product_service.kafka.event.dto.order.OrderItem;
 import com.binhphuc.product_service.kafka.event.dto.product.LockProductStockCommand;
@@ -33,8 +31,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public CreateProductResponse create(CreateProductRequest productRequest) {
-        Optional<Category> categoryOptional = categoryRepository.findById(productRequest.getCategoryId());
-        if (categoryOptional.isEmpty()) {
+        if (!categoryRepository.existsByIdAndIsDeletedFalse(productRequest.getCategoryId())) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "Category not found with id: " + productRequest
                     .getCategoryId());
         }

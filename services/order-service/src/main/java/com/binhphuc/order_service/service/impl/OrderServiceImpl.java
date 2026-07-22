@@ -3,6 +3,7 @@ package com.binhphuc.order_service.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.binhphuc.order_service.kafka.event.dto.order.ChangeOrderStatusCommand;
@@ -35,6 +36,19 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductClient productClient;
     private final OrderEventProducer orderEventProducer;
+
+    @Override
+    public Order getById(String orderId) {
+        Optional<Order> orderOptional = orderRepository.findById(orderId);
+        if (!orderOptional.isPresent()) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId + " not found");
+        }
+        Order order = orderOptional.get();
+        if (order.getIsDeleted()) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId + " not found");
+        }
+        return order;
+    }
 
     @Override
     @Transactional
@@ -123,10 +137,7 @@ public class OrderServiceImpl implements OrderService {
     public void changeOrderStatus(ChangeOrderStatusCommand changeOrderStatusCommand) {
         String orderId = changeOrderStatusCommand.getOrderId();
         OrderStatus orderStatus = changeOrderStatusCommand.getOrderStatus();
-        Order order = orderRepository
-                .findById(orderId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId +
-                        " not found"));
+        Order order = getById(orderId);
         order.setStatus(orderStatus);
         orderRepository.save(order);
     }

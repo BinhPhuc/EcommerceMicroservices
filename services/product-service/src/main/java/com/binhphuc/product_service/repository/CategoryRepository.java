@@ -10,4 +10,10 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, String> {
     Optional<Category> findByName(String name);
+
+    boolean existsByIdAndIsDeletedFalse(String id);
+
+    Optional<Category> findByIdAndIsDeletedFalse(String id);
+
+    Optional<Category> findByNameAndIsDeletedFalse(String name);
 }
