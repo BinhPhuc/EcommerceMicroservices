@@ -1,7 +1,10 @@
 package com.binhphuc.order_service.kafka.consumer;
 
 import com.binhphuc.order_service.kafka.event.dto.order.ChangeOrderStatusCommand;
+
+import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.stereotype.Component;
 
 import com.binhphuc.order_service.enums.OrderStatus;
@@ -19,11 +22,17 @@ public class ProductLockConsumer {
     private final OrderService orderService;
 
     @KafkaListener(topics = PRODUCT_LOCKED_TOPIC)
+    @RetryableTopic(
+            attempts = "4",
+            backOff = @BackOff(delay = 2000, multiplier = 2)
+    )
     public void consumeOrderCreatedEvent(ProductLockedEvent productLockedEvent) {
-        orderService.changeOrderStatus(ChangeOrderStatusCommand.builder()
-                .orderId(productLockedEvent.getOrderId())
-                .orderStatus(OrderStatus.PREPARED)
-                .build());
+        orderService
+                .changeOrderStatus(ChangeOrderStatusCommand
+                        .builder()
+                        .orderId(productLockedEvent.getOrderId())
+                        .orderStatus(OrderStatus.PREPARED)
+                        .build());
     }
 }
 
