@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.binhphuc.order_service.kafka.event.dto.order.ChangeOrderStatusCommand;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.order_service.client.product.ProductClient;
@@ -26,7 +27,6 @@ import com.binhphuc.order_service.repository.OrderRepository;
 import com.binhphuc.order_service.service.OrderService;
 import com.binhphuc.order_service.entity.OrderItem;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -134,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public void changeOrderStatus(ChangeOrderStatusCommand changeOrderStatusCommand) {
         String orderId = changeOrderStatusCommand.getOrderId();
         OrderStatus orderStatus = changeOrderStatusCommand.getOrderStatus();
