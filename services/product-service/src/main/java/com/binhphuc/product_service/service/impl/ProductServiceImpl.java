@@ -16,11 +16,12 @@ import com.binhphuc.product_service.service.ProductService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,16 +66,26 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public void lockProductStock(LockProductStockCommand lockProductStockCommand) {
         List<Product> products = new ArrayList<>();
-        for (OrderItem orderItem : lockProductStockCommand.getOrderItems()) {
-            Optional<Product> productOptional = productRepository.findById(orderItem.getProductId());
-            if (productOptional.isEmpty()) {
-                throw new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " + orderItem
-                        .getProductId());
+        List<String> productIds = lockProductStockCommand
+                .getOrderItems()
+                .stream()
+                .map(OrderItem::getProductId)
+                .toList();
+        List<Product> lockedProducts = productRepository.findByIdInForUpdate(productIds);
+        Map<String, Integer> productIdToQuantityMap = lockProductStockCommand
+                .getOrderItems()
+                .stream()
+                .collect(java.util.stream.Collectors.toMap(OrderItem::getProductId, OrderItem::getQuantity));
+        for (Product product : lockedProducts) {
+            Integer quantityToLock = productIdToQuantityMap.get(product.getId());
+            if (product.getStock() < quantityToLock) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for product with id: " + product
+                        .getId());
             }
-            Product product = productOptional.get();
-            product.setStock(product.getStock() - orderItem.getQuantity());
+            product.setStock(product.getStock() - quantityToLock);
             products.add(product);
         }
         productRepository.saveAll(products);
