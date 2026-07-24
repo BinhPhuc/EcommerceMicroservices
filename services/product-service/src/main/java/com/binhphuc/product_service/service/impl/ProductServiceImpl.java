@@ -92,7 +92,6 @@ public class ProductServiceImpl implements ProductService {
                 throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
                         "Could not acquire lock for product stock");
             }
-            Thread.sleep(4000);
             List<Product> lockedProducts = productRepository.findByIdIn(sortedProductIds);
             Map<String, Integer> productIdToQuantityMap = lockProductStockCommand
                     .getOrderItems()
