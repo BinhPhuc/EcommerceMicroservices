@@ -18,8 +18,23 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
+    public Category getById(String categoryId) {
+        Optional<Category> categoryOptional = categoryRepository.findByIdAndIsDeletedFalse(categoryId);
+        if (!categoryOptional.isPresent()) {
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Category not found with id: " + categoryId);
+        }
+        return categoryOptional.get();
+    }
+
+    @Override
+    public boolean existsById(String categoryId) {
+        return categoryRepository.existsByIdAndIsDeletedFalse(categoryId);
+    }
+
+    @Override
     public CreateCategoryResponse create(CreateCategoryRequest createCategoryRequest) {
-        Optional<Category> existingCategory = categoryRepository.findByName(createCategoryRequest.getName());
+        Optional<Category> existingCategory = categoryRepository
+                .findByIdAndIsDeletedFalse(createCategoryRequest.getName());
 
         if (!existingCategory.isEmpty()) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Category with name " + createCategoryRequest
@@ -31,16 +46,15 @@ public class CategoryServiceImpl implements CategoryService {
                 .name(createCategoryRequest.getName())
                 .parentId(createCategoryRequest.getParentId())
                 .build();
-        if (createCategoryRequest.getParentId().isEmpty()) {
+        String parentId = createCategoryRequest.getParentId();
+
+        if (parentId == null || parentId.isBlank()) {
             newCategory.setParentId(null);
-        } else {
-            Optional<Category> parentCategory = categoryRepository.findById(createCategoryRequest.getParentId());
-            if (parentCategory.isEmpty()) {
-                throw new BusinessException(HttpStatus.NOT_FOUND, "Parent category not found with id: " +
-                        createCategoryRequest
-                                .getParentId());
-            }
+        } else if (!existsById(parentId)) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Parent category with id " + parentId +
+                    " does not exist");
         }
+
         Category savedCategory = categoryRepository.save(newCategory);
         return CreateCategoryResponse
                 .builder()
