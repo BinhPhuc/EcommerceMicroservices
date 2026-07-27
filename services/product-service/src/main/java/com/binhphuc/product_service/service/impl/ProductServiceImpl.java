@@ -17,18 +17,25 @@ import com.binhphuc.product_service.service.ProductService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+import java.util.concurrent.TimeUnit;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ProductServiceImpl implements ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductRepository productRepository;
     private final ProductEventProducer productEventProducer;
+    private final RedissonClient redissonClient;
 
     @Override
     public CreateProductResponse create(CreateProductRequest productRequest) {
@@ -68,31 +75,53 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void lockProductStock(LockProductStockCommand lockProductStockCommand) {
+
         List<Product> products = new ArrayList<>();
-        List<String> productIds = lockProductStockCommand
+        List<String> sortedProductIds = lockProductStockCommand
                 .getOrderItems()
                 .stream()
                 .map(OrderItem::getProductId)
+                .sorted()
                 .toList();
-        List<Product> lockedProducts = productRepository.findByIdInForUpdate(productIds);
-        Map<String, Integer> productIdToQuantityMap = lockProductStockCommand
-                .getOrderItems()
-                .stream()
-                .collect(java.util.stream.Collectors.toMap(OrderItem::getProductId, OrderItem::getQuantity));
-        for (Product product : lockedProducts) {
-            Integer quantityToLock = productIdToQuantityMap.get(product.getId());
-            if (product.getStock() < quantityToLock) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for product with id: " + product
-                        .getId());
+        String lockKey = "lock:prduct_stock:" + String.join(",", sortedProductIds);
+        log.info("Attempting to acquire lock for product stock with key: {}", lockKey);
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            boolean isLockAcquired = lock.tryLock(10, 10, TimeUnit.SECONDS);
+            if (!isLockAcquired) {
+                throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
+                        "Could not acquire lock for product stock");
             }
-            product.setStock(product.getStock() - quantityToLock);
-            products.add(product);
+            List<Product> lockedProducts = productRepository.findByIdIn(sortedProductIds);
+            Map<String, Integer> productIdToQuantityMap = lockProductStockCommand
+                    .getOrderItems()
+                    .stream()
+                    .collect(java.util.stream.Collectors.toMap(OrderItem::getProductId, OrderItem::getQuantity));
+            for (Product product : lockedProducts) {
+                Integer quantityToLock = productIdToQuantityMap.get(product.getId());
+                if (product.getStock() < quantityToLock) {
+                    throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for product with id: " +
+                            product
+                                    .getId());
+                }
+                product.setStock(product.getStock() - quantityToLock);
+                products.add(product);
+            }
+            productRepository.saveAll(products);
+            productEventProducer
+                    .sendLockProductStockEvent(ProductLockedEvent
+                            .builder()
+                            .orderId(lockProductStockCommand.getOrderId())
+                            .build());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Thread interrupted while trying to acquire lock");
+        } finally {
+            log.info("Releasing lock for product stock with key: {}", lockKey);
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
-        productRepository.saveAll(products);
-        productEventProducer
-                .sendLockProductStockEvent(ProductLockedEvent
-                        .builder()
-                        .orderId(lockProductStockCommand.getOrderId())
-                        .build());
     }
 }
