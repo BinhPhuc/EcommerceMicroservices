@@ -1,5 +1,8 @@
-drop table if exists products;
-drop table if exists categories;
+CREATE DATABASE IF NOT EXISTS products
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE products;
 
 create table categories (
   id varchar(36) primary key,
