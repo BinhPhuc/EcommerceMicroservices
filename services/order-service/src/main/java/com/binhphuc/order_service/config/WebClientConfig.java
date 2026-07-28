@@ -7,6 +7,7 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -18,7 +19,8 @@ import reactor.netty.http.client.HttpClient;
 @EnableConfigurationProperties(ProductClientProperties.class)
 public class WebClientConfig {
     @Bean
-    public WebClient productClient(ProductClientProperties properties) {
+    public WebClient productClient(ProductClientProperties properties,
+            DeferringLoadBalancerExchangeFilterFunction<?> loadBalancerFilter) {
         HttpClient httpClient = HttpClient
                 .create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
@@ -31,6 +33,7 @@ public class WebClientConfig {
                 .builder()
                 .baseUrl(properties.getBaseUrl())
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .filter(loadBalancerFilter)
                 .build();
     }
 }
