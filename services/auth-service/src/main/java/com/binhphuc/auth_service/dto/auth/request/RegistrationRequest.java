@@ -1,4 +1,4 @@
-package com.binhphuc.auth_service.dto.auth;
+package com.binhphuc.auth_service.dto.auth.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -14,7 +14,7 @@ import lombok.Setter;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserRegistrationDTO {
+public class RegistrationRequest {
     @NotEmpty
     private String username;
 

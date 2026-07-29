@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.binhphuc.auth_service.dto.auth.UserRegistrationDTO;
+import com.binhphuc.auth_service.dto.auth.request.LoginRequest;
+import com.binhphuc.auth_service.dto.auth.request.RegistrationRequest;
+import com.binhphuc.auth_service.dto.auth.response.LoginResponse;
 import com.binhphuc.auth_service.service.UserService;
 import com.binhphuc.common_web_starter.dto.ApiResponse;
 
@@ -22,9 +24,15 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UserRegistrationDTO userRegistrationDTO) {
-        log.info("Registering user: {}", userRegistrationDTO.getUsername());
-        userService.createUser(userRegistrationDTO);
+    public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        log.info("Registering user: {}", registrationRequest.getUsername());
+        userService.createUser(registrationRequest);
         return ResponseEntity.ok(ApiResponse.created("User registered successfully"));
+    }
+
+    @PostMapping("")
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
+        return null;
+        // return ResponseEntity.ok(ApiResponse.ok("Login successful"));
     }
 }
