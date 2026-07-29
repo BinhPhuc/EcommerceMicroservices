@@ -1,6 +1,5 @@
 package com.binhphuc.order_service.controller;
 
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +23,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(@Valid
+    public ResponseEntity<ApiResponse<CreateOrderResponse>> createOrder(
                                                                         @RequestBody CreateOrderRequest createOrderRequest) {
         log.info("Received request to create order: {}", createOrderRequest);
         CreateOrderResponse response = orderService.createOrder(createOrderRequest);

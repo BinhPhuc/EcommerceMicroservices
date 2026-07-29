@@ -6,8 +6,6 @@ import com.binhphuc.product_service.dto.product.request.GetProductByIdsRequest;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
 import com.binhphuc.product_service.service.ProductService;
-
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +27,7 @@ public class ProductController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<CreateProductResponse>> createProduct(
-                                                                            @Valid @RequestBody CreateProductRequest productRequest) {
+                                                                            @RequestBody CreateProductRequest productRequest) {
         log.info("Creating product: {}", productRequest.getName());
         CreateProductResponse response = productService.create(productRequest);
         return ResponseEntity
@@ -39,7 +37,7 @@ public class ProductController {
 
     @PostMapping("/get-by-ids")
     public ResponseEntity<ApiResponse<List<GetProductByIdsResponse>>> getProductsByIds(
-                                                                                       @Valid @RequestBody GetProductByIdsRequest getProductByIdsRequest) {
+                                                                                       @RequestBody GetProductByIdsRequest getProductByIdsRequest) {
         log.info("Getting products by ids");
         List<GetProductByIdsResponse> response = productService.getProductByIds(getProductByIdsRequest);
         return ResponseEntity.ok(ApiResponse.success(response, "Products retrieved successfully"));
