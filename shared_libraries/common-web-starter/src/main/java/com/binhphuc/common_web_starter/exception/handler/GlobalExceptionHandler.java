@@ -57,18 +57,4 @@ public class GlobalExceptionHandler {
                 .build();
         return ResponseEntity.status(exception.getHttpStatus()).body(response);
     }
-
-    @ExceptionHandler(WebClientResponseException.class)
-    public ResponseEntity<ErrorResponse> handleWebClientResponseException(WebClientResponseException exception,
-                                                                          HttpServletRequest request) {
-        ErrorResponse response = ErrorResponse
-                .builder()
-                .statusCode(exception.getStatusCode().value())
-                .error(exception.getStatusText())
-                .message(exception.getMessage())
-                .path(request.getRequestURI())
-                .timestamp(java.time.Instant.now())
-                .build();
-        return ResponseEntity.status(exception.getStatusCode()).body(response);
-    }
 }

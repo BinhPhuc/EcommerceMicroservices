@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.CredentialRepresentation;
+import org.keycloak.representations.idm.ErrorRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -54,14 +55,20 @@ public class UserServiceImpl implements UserService {
         user.setCredentials(Collections.singletonList(credentialRepresentation));
 
         Response response = keycloak.realm(realm).users().create(user);
+
         if (response == null) {
-            throw new BusinessException(HttpStatus.BAD_GATEWAY, "Failed to create user");
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "Keycloak service is not available");
         }
-        if (response.getStatus() != 201) {
-            int statusCode = response.getStatus();
-            HttpStatus httpStatus = HttpStatus.valueOf(statusCode);
-            throw new BusinessException(httpStatus, "Failed to create user");
+
+        int statusCode = response.getStatus();
+
+        if (statusCode != 201) {
+            ErrorRepresentation errorRepresentation = response.readEntity(ErrorRepresentation.class);
+            String errorMessage = errorRepresentation != null ? errorRepresentation.getErrorMessage() : "Unknown error";
+            throw new BusinessException(HttpStatus.valueOf(statusCode), errorMessage);
         }
+
+        response.close();
     }
 
     @Override
