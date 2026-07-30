@@ -14,6 +14,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class LoginResponse {
+    @JsonProperty("access_token")
     private String accessToken;
 
     @JsonProperty("expires_in")

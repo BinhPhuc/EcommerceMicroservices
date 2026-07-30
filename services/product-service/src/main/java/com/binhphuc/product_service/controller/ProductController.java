@@ -29,7 +29,7 @@ public class ProductController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<CreateProductResponse>> createProduct(
-                                                                            @Valid @RequestBody CreateProductRequest productRequest) {
+            @Valid @RequestBody CreateProductRequest productRequest) {
         log.info("Creating product: {}", productRequest.getName());
         CreateProductResponse response = productService.create(productRequest);
         return ResponseEntity
@@ -39,7 +39,7 @@ public class ProductController {
 
     @PostMapping("/get-by-ids")
     public ResponseEntity<ApiResponse<List<GetProductByIdsResponse>>> getProductsByIds(
-                                                                                       @Valid @RequestBody GetProductByIdsRequest getProductByIdsRequest) {
+            @Valid @RequestBody GetProductByIdsRequest getProductByIdsRequest) {
         log.info("Getting products by ids");
         List<GetProductByIdsResponse> response = productService.getProductByIds(getProductByIdsRequest);
         return ResponseEntity.ok(ApiResponse.success(response, "Products retrieved successfully"));
