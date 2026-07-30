@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import com.binhphuc.auth_service.client.cloak.KeycloakClient;
+import com.binhphuc.auth_service.client.cloak.dto.request.OIDCDiscoveryRequest;
+import com.binhphuc.auth_service.client.cloak.dto.request.TokenRequest;
+import com.binhphuc.auth_service.client.cloak.dto.response.OIDCDiscoveryResponse;
+import com.binhphuc.auth_service.client.cloak.dto.response.TokenResponse;
 import com.binhphuc.auth_service.dto.auth.request.LoginRequest;
 import com.binhphuc.auth_service.dto.auth.request.RegistrationRequest;
 import com.binhphuc.auth_service.dto.auth.response.LoginResponse;
@@ -24,7 +29,15 @@ public class UserServiceImpl implements UserService {
     @Value("${keycloak.realm}")
     private String realm;
 
+    @Value("${keycloak.clientId}")
+    private String clientId;
+
+    @Value("${keycloak.clientSecret}")
+    private String clientSecret;
+
     private final Keycloak keycloak;
+    private final KeycloakClient keycloakClient;
+    private final String grantType = "password";
 
     @Override
     public void createUser(RegistrationRequest registrationRequest) {
@@ -53,7 +66,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginResponse auth(LoginRequest loginRequest) {
+        OIDCDiscoveryResponse oidcDiscoveryResponse = keycloakClient
+                .getOidcDiscovery(OIDCDiscoveryRequest.builder().realm(realm).build());
 
-        return null;
+        TokenResponse tokenResponse = keycloakClient
+                .getToken(TokenRequest
+                        .builder()
+                        .clientId(clientId)
+                        .clientSecret(clientSecret)
+                        .username(loginRequest.getUsername())
+                        .password(loginRequest.getPassword())
+                        .tokenEndpoint(oidcDiscoveryResponse.getTokenEndpoint())
+                        .grantType(grantType)
+                        .build());
+
+        return LoginResponse
+                .builder()
+                .accessToken(tokenResponse.getAccessToken())
+                .refreshToken(tokenResponse.getRefreshToken())
+                .expiresIn(tokenResponse.getExpiresIn())
+                .refreshExpiresIn(tokenResponse.getRefreshExpiresIn())
+                .build();
     }
 }

@@ -1,9 +1,8 @@
-package com.binhphuc.auth_service.dto.auth.response;
+package com.binhphuc.auth_service.client.cloak.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,8 +11,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class LoginResponse {
+public class TokenResponse {
+    @JsonProperty("access_token")
     private String accessToken;
 
     @JsonProperty("expires_in")
