@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<LoginResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
         log.info("Logging in user: {}", loginRequest.getUsername());
         LoginResponse loginResponse = userService.auth(loginRequest);
         return ResponseEntity.ok(ApiResponse.success(loginResponse));

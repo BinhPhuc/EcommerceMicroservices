@@ -1,6 +1,7 @@
 package com.binhphuc.auth_service.dto.auth.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sun.istack.NotNull;
 
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -32,5 +33,6 @@ public class RegistrationRequest {
     @NotEmpty
     private String password;
 
+    @NotNull
     private String role;
 }

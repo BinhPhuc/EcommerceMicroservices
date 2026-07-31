@@ -8,7 +8,7 @@ spring:
 keycloak:
   serverUrl: http://localhost:8086
   clientId: ecom
-  clientSecret: EQ4Dz6eAOMO5xBsn9aJliSle1c7AJBMQVP2V9i1d8I0sNzGmJoIx99SVm8ULVpZLfH81t967cvsBp3cmvx7BY6
+  clientSecret: bwfaZ333SB7JmO2GvU9BKaq5aqr0dp1vhMew3ewO4Qa7ssVQ5gRsjEIC9duK1ZHVY8MT6JfuhSY3MeCxI8bRCy
   realm: ecom-realm
 
 services:
