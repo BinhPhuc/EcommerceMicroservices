@@ -1,0 +1,17 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: auth_service
+
+keycloak:
+  serverUrl: http://localhost:8086
+  clientId: ecom
+  clientSecret: bwfaZ333SB7JmO2GvU9BKaq5aqr0dp1vhMew3ewO4Qa7ssVQ5gRsjEIC9duK1ZHVY8MT6JfuhSY3MeCxI8bRCy
+  realm: ecom-realm
+
+services:
+  keycloak:
+    base-url: http://localhost:8086
+    timeout: 5s

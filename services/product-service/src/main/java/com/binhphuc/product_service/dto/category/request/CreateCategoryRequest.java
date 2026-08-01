@@ -1,5 +1,6 @@
 package com.binhphuc.product_service.dto.category.request;
 
+import com.esotericsoftware.kryo.serializers.FieldSerializer.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,6 @@ public class CreateCategoryRequest {
     private String name;
 
     @JsonProperty("parent_id")
-    @NotEmpty
+    @NotNull
     private String parentId;
 }
