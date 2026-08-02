@@ -71,7 +71,7 @@ services:
       - mysql_data:/var/lib/mysql
       - ./databases/init:/docker-entrypoint-initdb.d:ro
     ports:
-      - "3306:3306"
+      - 3306:3306
     networks:
       - ecom-net
     healthcheck:
@@ -85,7 +85,7 @@ services:
     container_name: keycloak
     restart: always
     ports:
-      - "8086:8080"
+      - 8086:8080
     environment:
       KC_HEALTH_ENABLED: true
       KC_METRICS_ENABLED: true
@@ -102,75 +102,10 @@ services:
         condition: service_healthy
     networks:
       - ecom-net
-
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:9.4.4
-    container_name: elasticsearch
-    restart: always
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-    environment:
-      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
-      bootstrap.memory_lock: true
-      xpack.security.enabled: false
-      discovery.type: single-node
-    volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    networks:
-      - ecom-net
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "curl -fs 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=5s' || exit 1",
-        ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
-
-  logstash:
-    image: docker.elastic.co/logstash/logstash:9.4.4
-    container_name: logstash
-    restart: always
-    volumes:
-      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    ports:
-      - "5044:5044"
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-    environment:
-      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - ecom-net
-
-  kibana:
-    image: docker.elastic.co/kibana/kibana:9.4.4
-    container_name: kibana
-    restart: always
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - ecom-net
-
 volumes:
   redis_insight_data:
   redis_data:
   mysql_data:
-  elasticsearch_data:
 
 networks:
   ecom-net:
