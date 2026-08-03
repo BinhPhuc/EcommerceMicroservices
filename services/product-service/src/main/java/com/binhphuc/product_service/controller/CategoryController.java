@@ -4,6 +4,8 @@ import com.binhphuc.common_web_starter.dto.ApiResponse;
 import com.binhphuc.product_service.dto.category.request.CreateCategoryRequest;
 import com.binhphuc.product_service.dto.category.response.CreateCategoryResponse;
 import com.binhphuc.product_service.service.CategoryService;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,7 +24,7 @@ public class CategoryController {
 
     @PostMapping("/create")
     public ResponseEntity<ApiResponse<CreateCategoryResponse>> createCategory(
-                                                                              @RequestBody CreateCategoryRequest createCategoryRequest) {
+            @Valid @RequestBody CreateCategoryRequest createCategoryRequest) {
         log.info("Create category: {}", createCategoryRequest.getName());
         CreateCategoryResponse response = categoryService.create(createCategoryRequest);
         return ResponseEntity
