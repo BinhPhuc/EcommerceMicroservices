@@ -9,6 +9,7 @@ import com.binhphuc.product_service.service.CategoryService;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
+    @Cacheable(value = "categories", key = "#categoryId", condition = "#categoryId != null")
     public Category getById(String categoryId) {
         Optional<Category> categoryOptional = categoryRepository.findByIdAndIsDeletedFalse(categoryId);
         if (!categoryOptional.isPresent()) {

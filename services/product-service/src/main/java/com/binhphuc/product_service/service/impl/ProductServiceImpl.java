@@ -8,7 +8,7 @@ import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse
 import com.binhphuc.product_service.entity.Product;
 import com.binhphuc.product_service.kafka.event.ProductLockedEvent;
 import com.binhphuc.product_service.kafka.event.dto.order.OrderItem;
-import com.binhphuc.product_service.kafka.event.dto.product.LockProductStockCommand;
+import com.binhphuc.product_service.kafka.command.LockProductStockCommand;
 import com.binhphuc.product_service.kafka.producer.ProductEventProducer;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.repository.ProductRepository;
@@ -19,12 +19,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import javax.cache.CacheManager;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +41,9 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductEventProducer productEventProducer;
     private final RedissonClient redissonClient;
+
+    @Qualifier("redisCacheManager")
+    private final CacheManager redisCacheManager;
 
     @Override
     public CreateProductResponse create(CreateProductRequest productRequest) {
@@ -56,7 +63,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(value = "products", key = "#getProductByIdsRequest.productIds")
+    @Cacheable(value = "products", key = "#getProductByIdsRequest.productIds", cacheManager = "redisCacheManager")
     public List<GetProductByIdsResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest) {
         List<Product> products = productRepository.findByIdIn(getProductByIdsRequest.getProductIds());
         List<GetProductByIdsResponse> responseList = products
@@ -71,6 +78,7 @@ public class ProductServiceImpl implements ProductService {
                         .isDeleted(product.getIsDeleted())
                         .build())
                 .toList();
+        redisCacheManager.get
         return responseList;
     }
 

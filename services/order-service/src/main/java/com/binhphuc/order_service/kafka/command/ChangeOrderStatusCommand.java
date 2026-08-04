@@ -1,4 +1,4 @@
-package com.binhphuc.order_service.kafka.event.dto.order;
+package com.binhphuc.order_service.kafka.command;
 
 import com.binhphuc.order_service.enums.OrderStatus;
 import lombok.*;
