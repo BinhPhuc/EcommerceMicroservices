@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,6 +56,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "products", key = "#getProductByIdsRequest.productIds")
     public List<GetProductByIdsResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest) {
         List<Product> products = productRepository.findByIdIn(getProductByIdsRequest.getProductIds());
         List<GetProductByIdsResponse> responseList = products
@@ -75,7 +77,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void lockProductStock(LockProductStockCommand lockProductStockCommand) {
-
         List<Product> products = new ArrayList<>();
         List<String> sortedProductIds = lockProductStockCommand
                 .getOrderItems()
