@@ -1,6 +1,6 @@
 package com.binhphuc.product_service.kafka.consumer;
 
-import com.binhphuc.product_service.kafka.event.dto.product.LockProductStockCommand;
+import com.binhphuc.product_service.kafka.command.LockProductStockCommand;
 
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;

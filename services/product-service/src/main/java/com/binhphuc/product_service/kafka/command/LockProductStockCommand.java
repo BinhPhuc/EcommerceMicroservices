@@ -1,4 +1,4 @@
-package com.binhphuc.product_service.kafka.event.dto.product;
+package com.binhphuc.product_service.kafka.command;
 
 import java.util.List;
 
