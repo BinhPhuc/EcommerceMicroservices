@@ -6,7 +6,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.binhphuc.order_service.kafka.event.dto.order.ChangeOrderStatusCommand;
+import com.binhphuc.order_service.kafka.command.ChangeOrderStatusCommand;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderEventProducer orderEventProducer;
 
     @Override
+    @Cacheable(value = "orders", key = "#orderId")
     public Order getById(String orderId) {
         Optional<Order> orderOptional = orderRepository.findById(orderId);
         if (!orderOptional.isPresent()) {
@@ -135,6 +138,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "orders", key = "#changeOrderStatusCommand.orderId")
     public void changeOrderStatus(ChangeOrderStatusCommand changeOrderStatusCommand) {
         String orderId = changeOrderStatusCommand.getOrderId();
         OrderStatus orderStatus = changeOrderStatusCommand.getOrderStatus();

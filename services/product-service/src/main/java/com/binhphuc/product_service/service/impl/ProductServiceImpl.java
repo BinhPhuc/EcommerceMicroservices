@@ -8,7 +8,7 @@ import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse
 import com.binhphuc.product_service.entity.Product;
 import com.binhphuc.product_service.kafka.event.ProductLockedEvent;
 import com.binhphuc.product_service.kafka.event.dto.order.OrderItem;
-import com.binhphuc.product_service.kafka.event.dto.product.LockProductStockCommand;
+import com.binhphuc.product_service.kafka.command.LockProductStockCommand;
 import com.binhphuc.product_service.kafka.producer.ProductEventProducer;
 import com.binhphuc.product_service.repository.CategoryRepository;
 import com.binhphuc.product_service.repository.ProductRepository;
@@ -24,6 +24,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.Cache;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +40,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductEventProducer productEventProducer;
     private final RedissonClient redissonClient;
+    @Qualifier("redisCacheManager")
+    private final RedisCacheManager redisCacheManager;
 
     @Override
     public CreateProductResponse create(CreateProductRequest productRequest) {
@@ -54,9 +60,27 @@ public class ProductServiceImpl implements ProductService {
         return CreateProductResponse.builder().name(savedProduct.getName()).build();
     }
 
+    private Product cacheProductById(String productId) {
+        Cache productCache = redisCacheManager.getCache("products");
+        Product cachedProduct = productCache.get(productId, Product.class);
+        if (cachedProduct != null) {
+            return cachedProduct;
+        }
+        Product product = productRepository
+                .findById(productId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " +
+                        productId));
+        productCache.put(productId, product);
+        return product;
+    }
+
     @Override
     public List<GetProductByIdsResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest) {
-        List<Product> products = productRepository.findByIdIn(getProductByIdsRequest.getProductIds());
+        List<Product> products = new ArrayList<>();
+        for (String productId : getProductByIdsRequest.getProductIds()) {
+            Product product = cacheProductById(productId);
+            products.add(product);
+        }
         List<GetProductByIdsResponse> responseList = products
                 .stream()
                 .map(product -> GetProductByIdsResponse
@@ -74,8 +98,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public void lockProductStock(LockProductStockCommand lockProductStockCommand) {
-
         List<Product> products = new ArrayList<>();
         List<String> sortedProductIds = lockProductStockCommand
                 .getOrderItems()

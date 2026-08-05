@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
 import com.binhphuc.product_service.dto.product.request.GetProductByIdsRequest;
-import com.binhphuc.product_service.kafka.event.dto.product.LockProductStockCommand;
+import com.binhphuc.product_service.kafka.command.LockProductStockCommand;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
 import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
 

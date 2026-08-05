@@ -1,6 +1,6 @@
 package com.binhphuc.order_service.kafka.consumer;
 
-import com.binhphuc.order_service.kafka.event.dto.order.ChangeOrderStatusCommand;
+import com.binhphuc.order_service.kafka.command.ChangeOrderStatusCommand;
 
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
