@@ -30,10 +30,12 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeExchange((authorize) -> authorize
-                        .pathMatchers("/api/v1/orders/*")
+                        .pathMatchers("/api/v1/orders/**")
                         .hasAuthority("ROLE_USER")
-                        .pathMatchers("/api/v1/products/*")
+                        .pathMatchers("/api/v1/products/**")
                         .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .pathMatchers("/api/v1/auth/**")
+                        .permitAll()
                         .anyExchange()
                         .authenticated()
                 )
