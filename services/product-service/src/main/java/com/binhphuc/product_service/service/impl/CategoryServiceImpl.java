@@ -29,6 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Cacheable(value = "exist:category", key = "#categoryId", condition = "#categoryId != null")
     public boolean existsById(String categoryId) {
         return categoryRepository.existsByIdAndIsDeletedFalse(categoryId);
     }

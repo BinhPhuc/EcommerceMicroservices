@@ -19,15 +19,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import javax.cache.CacheManager;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.Cache;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -41,9 +40,8 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductEventProducer productEventProducer;
     private final RedissonClient redissonClient;
-
     @Qualifier("redisCacheManager")
-    private final CacheManager redisCacheManager;
+    private final RedisCacheManager redisCacheManager;
 
     @Override
     public CreateProductResponse create(CreateProductRequest productRequest) {
@@ -62,10 +60,27 @@ public class ProductServiceImpl implements ProductService {
         return CreateProductResponse.builder().name(savedProduct.getName()).build();
     }
 
+    private Product cacheProductById(String productId) {
+        Cache productCache = redisCacheManager.getCache("products");
+        Product cachedProduct = productCache.get(productId, Product.class);
+        if (cachedProduct != null) {
+            return cachedProduct;
+        }
+        Product product = productRepository
+                .findById(productId)
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " +
+                        productId));
+        productCache.put(productId, product);
+        return product;
+    }
+
     @Override
-    @Cacheable(value = "products", key = "#getProductByIdsRequest.productIds", cacheManager = "redisCacheManager")
     public List<GetProductByIdsResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest) {
-        List<Product> products = productRepository.findByIdIn(getProductByIdsRequest.getProductIds());
+        List<Product> products = new ArrayList<>();
+        for (String productId : getProductByIdsRequest.getProductIds()) {
+            Product product = cacheProductById(productId);
+            products.add(product);
+        }
         List<GetProductByIdsResponse> responseList = products
                 .stream()
                 .map(product -> GetProductByIdsResponse
@@ -78,12 +93,12 @@ public class ProductServiceImpl implements ProductService {
                         .isDeleted(product.getIsDeleted())
                         .build())
                 .toList();
-        redisCacheManager.get
         return responseList;
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "products", allEntries = true)
     public void lockProductStock(LockProductStockCommand lockProductStockCommand) {
         List<Product> products = new ArrayList<>();
         List<String> sortedProductIds = lockProductStockCommand

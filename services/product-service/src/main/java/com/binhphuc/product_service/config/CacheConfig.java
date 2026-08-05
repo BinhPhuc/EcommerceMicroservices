@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-
+import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializationContext;
 import com.github.benmanes.caffeine.cache.Caffeine;
 
 @Configuration
@@ -30,6 +31,8 @@ public class CacheConfig {
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration
                 .defaultCacheConfig()
                 .entryTtl(java.time.Duration.ofMinutes(10))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(GenericJacksonJsonRedisSerializer.builder().build()))
                 .disableCachingNullValues();
         RedisCacheManager cacheManager = RedisCacheManager
                 .builder(connectionFactory)
