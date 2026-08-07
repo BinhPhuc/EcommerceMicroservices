@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.GrantedAuthority;
@@ -32,8 +33,10 @@ public class SecurityConfig {
                 .authorizeExchange((authorize) -> authorize
                         .pathMatchers("/api/v1/orders/**")
                         .hasAuthority("ROLE_USER")
+                        .pathMatchers(HttpMethod.GET, "/api/v1/products/**", "/api/v1/categories/**")
+                        .permitAll()
                         .pathMatchers("/api/v1/products/**")
-                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        .hasAnyAuthority("ROLE_ADMIN")
                         .pathMatchers("/api/v1/auth/**")
                         .permitAll()
                         .anyExchange()
