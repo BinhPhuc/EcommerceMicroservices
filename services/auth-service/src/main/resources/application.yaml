@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: auth_service
+    name: auth-service
 
 keycloak:
   serverUrl: http://localhost:8086
@@ -15,3 +15,8 @@ services:
   keycloak:
     base-url: http://localhost:8086
     timeout: 5s
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
