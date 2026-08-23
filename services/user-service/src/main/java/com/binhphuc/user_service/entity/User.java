@@ -1,4 +1,4 @@
-package com.binhphuc.order_service.entity;
+package com.binhphuc.user_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,24 +19,25 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    private String name;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    @Column(unique = true)
+    private String email;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    private Instant birthday;
+
+    @Column(name = "keycloak_user_id", length = 36, unique = true)
+    private String keycloakUserId;
 }

@@ -18,24 +18,18 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "order_snapshots")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class OrderSnapshot extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "order_id", length = 36, unique = true)
+    private String orderId;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
-
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
-
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(name = "shipping_address")
+    private String shippingAddress;
 }

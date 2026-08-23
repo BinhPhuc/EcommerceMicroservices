@@ -1,4 +1,4 @@
-package com.binhphuc.order_service.entity;
+package com.binhphuc.user_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -18,24 +18,31 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "user_addresses")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class UserAddress extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "user_id", length = 36)
+    private String userId;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    @Column(name = "recipient_name")
+    private String recipientName;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Column(name = "phone_number")
+    private String phoneNumber;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    private String province;
+
+    private String ward;
+
+    @Column(name = "street_address")
+    private String streetAddress;
+
+    @Column(name = "is_default", nullable = false)
+    private Boolean isDefault;
 }

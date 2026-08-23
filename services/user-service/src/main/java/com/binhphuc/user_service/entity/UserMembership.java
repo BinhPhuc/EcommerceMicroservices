@@ -1,12 +1,16 @@
-package com.binhphuc.order_service.entity;
+package com.binhphuc.user_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
+import com.binhphuc.user_service.enums.MembershipTier;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,24 +22,24 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "user_memberships")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class UserMembership extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "user_id", length = 36)
+    private String userId;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    @Enumerated(EnumType.STRING)
+    private MembershipTier tier;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Column(name = "started_at")
+    private Instant startedAt;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(name = "expires_at")
+    private Instant expiresAt;
 }

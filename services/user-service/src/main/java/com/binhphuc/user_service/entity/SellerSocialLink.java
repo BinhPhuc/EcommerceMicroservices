@@ -1,4 +1,4 @@
-package com.binhphuc.order_service.entity;
+package com.binhphuc.user_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -18,24 +18,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "seller_social_links")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class SellerSocialLink extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "seller_id", length = 36)
+    private String sellerId;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    private String platform;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
-
-    @Column(nullable = false)
-    private Integer quantity;
+    private String url;
 }
