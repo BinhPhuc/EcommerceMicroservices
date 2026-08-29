@@ -1,4 +1,4 @@
-package com.binhphuc.order_service.entity;
+package com.binhphuc.product_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,24 +19,21 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "product_statistics")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class ProductStatistic extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
-
-    @Column(name = "product_id", length = 36)
+    @Column(name = "product_id", length = 36, unique = true)
     private String productId;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Column(name = "average_rating", nullable = false, precision = 3, scale = 2)
+    private BigDecimal averageRating;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(name = "review_count", nullable = false)
+    private Long reviewCount;
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,24 +19,24 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "order_item_snapshots")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class OrderItemSnapshot extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "order_item_id", length = 36, unique = true)
+    private String orderItemId;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    @Column(name = "product_name")
+    private String productName;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Column(name = "variant_attributes", columnDefinition = "JSON")
+    private String variantAttributes;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(precision = 19, scale = 2)
+    private BigDecimal price;
 }

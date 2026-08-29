@@ -22,7 +22,7 @@ public class BaseEntity {
   @Column(name = "is_deleted") private Boolean isDeleted;
 
   @CreatedDate
-  @Column(name = "created_date", nullable = false, updatable = false)
+  @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdDate;
 
   @CreatedBy
@@ -30,7 +30,7 @@ public class BaseEntity {
   private String createdBy;
 
   @LastModifiedDate
-  @Column(name = "last_modified_date")
+  @Column(name = "last_modified_at")
   private Instant lastModifiedDate;
 
   @LastModifiedBy

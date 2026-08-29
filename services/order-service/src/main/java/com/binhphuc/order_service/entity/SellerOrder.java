@@ -1,12 +1,16 @@
 package com.binhphuc.order_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
+import com.binhphuc.order_service.enums.SellerOrderStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.math.BigDecimal;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,24 +22,24 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "seller_orders")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class SellerOrder extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "order_id", length = 36)
+    private String orderId;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    @Column(name = "seller_id", length = 36)
+    private String sellerId;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Enumerated(EnumType.STRING)
+    private SellerOrderStatus status;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(name = "shipping_fee", precision = 19, scale = 2)
+    private BigDecimal shippingFee;
 }

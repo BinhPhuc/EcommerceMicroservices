@@ -2,7 +2,7 @@ package com.binhphuc.order_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
 import com.binhphuc.order_service.enums.OrderStatus;
-
+import com.binhphuc.order_service.enums.PaymentMethod;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,14 +11,20 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.*;
+import java.math.BigDecimal;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
 @Builder
 @Table(name = "orders")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Order extends BaseEntity {
     @Id
@@ -26,13 +32,16 @@ public class Order extends BaseEntity {
     @Column(length = 36)
     private String id;
 
-    @Column(name = "customer_id", length = 36, nullable = false)
-    private String customerId;
+    @Column(name = "user_id", length = 36)
+    private String userId;
+
+    @Column(name = "total_amount", precision = 19, scale = 2)
+    private BigDecimal totalAmount;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private OrderStatus status;
 
-    @Column(name = "total_amount", nullable = false)
-    private Integer totalAmount;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
 }

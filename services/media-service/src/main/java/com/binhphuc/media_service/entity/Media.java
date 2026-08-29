@@ -1,8 +1,11 @@
-package com.binhphuc.order_service.entity;
+package com.binhphuc.media_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
+import com.binhphuc.media_service.enums.MediaType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,24 +21,25 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "medias")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class Media extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "user_id", length = 36)
+    private String userId;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    @Column(name = "original_name")
+    private String originalName;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "media_type")
+    private MediaType mediaType;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(name = "cdn_url")
+    private String cdnUrl;
 }

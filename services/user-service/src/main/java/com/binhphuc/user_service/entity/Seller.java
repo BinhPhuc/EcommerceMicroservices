@@ -1,8 +1,11 @@
-package com.binhphuc.order_service.entity;
+package com.binhphuc.user_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
+import com.binhphuc.user_service.enums.SellerStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,24 +21,30 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "order_items")
+@Table(name = "sellers")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class OrderItem extends BaseEntity {
+public class Seller extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "seller_order_id", length = 36)
-    private String sellerOrderId;
+    @Column(name = "store_name")
+    private String storeName;
 
-    @Column(name = "product_id", length = 36)
-    private String productId;
+    @Column(name = "user_id", length = 36)
+    private String userId;
 
-    @Column(name = "variant_id", length = 36)
-    private String variantId;
+    @Column(name = "logo_url")
+    private String logoUrl;
 
-    @Column(nullable = false)
-    private Integer quantity;
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "business_address")
+    private String businessAddress;
+
+    @Enumerated(EnumType.STRING)
+    private SellerStatus status;
 }
