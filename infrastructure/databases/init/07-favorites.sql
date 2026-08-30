@@ -12,6 +12,6 @@ CREATE TABLE IF NOT EXISTS favourites (
     last_modified_at    TIMESTAMP    NOT NULL,
     is_deleted          BOOLEAN      NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id),
-    UNIQUE KEY uk_favourites_user_product (user_id, product_id),
+    UNIQUE KEY uk_favourites_user_product (user_id, product_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS collections (
     last_modified_by    VARCHAR(36),
     last_modified_at    TIMESTAMP    NOT NULL,
     is_deleted          BOOLEAN      NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (id),
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS collection_products (

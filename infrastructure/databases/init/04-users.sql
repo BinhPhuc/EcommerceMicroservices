@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     is_deleted          BOOLEAN      NOT NULL DEFAULT FALSE,
     PRIMARY KEY (id),
     UNIQUE KEY uk_users_email (email),
-    UNIQUE KEY uk_users_keycloak_user_id (keycloak_user_id),
+    UNIQUE KEY uk_users_keycloak_user_id (keycloak_user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS sellers (
