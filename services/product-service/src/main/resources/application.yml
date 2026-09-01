@@ -30,6 +30,11 @@ spring:
     hibernate:
       ddl-auto: update
 
+services:
+  timeout: 5s
+  inventory:
+    base-url: http://inventory-service/api/v1
+
 eureka:
   client:
     service-url:
