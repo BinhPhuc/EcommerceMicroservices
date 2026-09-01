@@ -1,25 +1,28 @@
 package com.binhphuc.product_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
+import java.util.Map;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.springframework.stereotype.Indexed;
 
 @Entity
 @Getter
 @Setter
 @Builder
-@Table(name = "product_variants")
+@Table(name = "product_variants", indexes = {
+        @Index(name = "idx_product_sku", columnList = "sku", unique = true)
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class ProductVariant extends BaseEntity {
@@ -31,11 +34,10 @@ public class ProductVariant extends BaseEntity {
     @Column(name = "product_id", length = 36)
     private String productId;
 
-    @Column(unique = true)
     private String sku;
 
-    @Column(columnDefinition = "JSON")
-    private String attributes;
+    @JdbcTypeCode(SqlTypes.JSON)
+    private Map<String, String> attributes;
 
     @Column(precision = 19, scale = 2)
     private BigDecimal price;
