@@ -16,11 +16,11 @@ import lombok.ToString;
 @Builder
 @ToString
 public class FlashSaleItemReservedEvent {
-    private String flashSaleId;
-    private String flashSaleItemId;
+    private String campaignId;
+    private String campaignItemId;
     private String productId;
     private String variantId;
     private String userId;
-    private BigDecimal flashPrice;
+    private BigDecimal price;
     private Integer quantity;
 }

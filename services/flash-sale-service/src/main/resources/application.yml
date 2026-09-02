@@ -5,10 +5,10 @@ spring:
   application:
     name: flash-sale-service
 
-  datasource:
-    url: jdbc:mysql://localhost:3306/flash_sales
-    username: root
-    password: rootpassword
+#  datasource:
+#    url: jdbc:mysql://localhost:3306/flash_sales
+#    username: root
+#    password: rootpassword
 
   kafka:
     bootstrap-servers: localhost:29092
@@ -26,9 +26,9 @@ spring:
       host: localhost
       port: 6379
 
-  jpa:
-    hibernate:
-      ddl-auto: update
+#  jpa:
+#    hibernate:
+#      ddl-auto: update
 
 eureka:
   client:

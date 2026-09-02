@@ -1,36 +1,36 @@
 package com.binhphuc.flash_sale_service.dto.flash_sale.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
-import java.util.List;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateFlashSaleRequest {
+public class CreateCampaignItemRequest {
+    @JsonProperty("product_id")
     @NotEmpty
-    private String name;
+    private String productId;
 
-    private String description;
-
-    @JsonProperty("started_at")
-    @NotNull
-    private Instant startedAt;
-
-    @JsonProperty("ended_at")
-    @NotNull
-    private Instant endedAt;
-
-    @Valid
+    @JsonProperty("variant_id")
     @NotEmpty
-    private List<CreateFlashSaleItemRequest> items;
+    private String variantId;
+
+    @NotNull
+    @Positive
+    private BigDecimal price;
+
+    @NotNull
+    @Positive
+    private Long stock;
 }

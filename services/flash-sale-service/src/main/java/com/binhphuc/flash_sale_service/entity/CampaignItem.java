@@ -6,8 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Index;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.math.BigDecimal;
 
@@ -22,19 +22,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "flash_sale_items", indexes = {
-        @Index(name = "idx_flash_sale_item_variant", columnList = "flash_sale_id, variant_id", unique = true)
+@Table(name = "campaign_items", uniqueConstraints = {
+        @UniqueConstraint(name = "uk_flash_sale_items_variant", columnNames = {"campaign_id", "variant_id"})
 })
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class FlashSaleItem extends BaseEntity {
+public class CampaignItem extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
     private String id;
 
-    @Column(name = "flash_sale_id", length = 36)
-    private String flashSaleId;
+    @Column(name = "campaign_id", length = 36)
+    private String campaignId;
 
     @Column(name = "product_id", length = 36)
     private String productId;
@@ -42,15 +42,12 @@ public class FlashSaleItem extends BaseEntity {
     @Column(name = "variant_id", length = 36)
     private String variantId;
 
-    @Column(name = "flash_price", precision = 19, scale = 2)
-    private BigDecimal flashPrice;
+    @Column(name = "price", precision = 19, scale = 2)
+    private BigDecimal price;
 
     @Column(name = "stock", nullable = false)
     private Long stock;
 
     @Column(name = "sold_quantity", nullable = false)
     private Long soldQuantity;
-
-    @Column(name = "purchase_limit", nullable = false)
-    private Integer purchaseLimit;
 }

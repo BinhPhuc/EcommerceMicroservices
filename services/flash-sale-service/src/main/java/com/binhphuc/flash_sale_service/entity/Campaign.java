@@ -1,11 +1,8 @@
 package com.binhphuc.flash_sale_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
-import com.binhphuc.flash_sale_service.enums.FlashSaleStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,10 +21,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "flash_sales")
+@Table(name = "campaigns")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class FlashSale extends BaseEntity {
+public class Campaign extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(length = 36)
@@ -37,9 +34,6 @@ public class FlashSale extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Enumerated(EnumType.STRING)
-    private FlashSaleStatus status;
 
     @Column(name = "started_at", nullable = false)
     private Instant startedAt;

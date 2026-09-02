@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetFlashSaleItemResponse {
+public class GetCampaignItemResponse {
     private String id;
 
     @JsonProperty("product_id")
@@ -23,14 +23,10 @@ public class GetFlashSaleItemResponse {
     @JsonProperty("variant_id")
     private String variantId;
 
-    @JsonProperty("flash_price")
-    private BigDecimal flashPrice;
+    private BigDecimal price;
 
     private Long stock;
 
     @JsonProperty("sold_quantity")
     private Long soldQuantity;
-
-    @JsonProperty("purchase_limit")
-    private Integer purchaseLimit;
 }
