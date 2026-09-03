@@ -1,6 +1,9 @@
 package com.binhphuc.flash_sale_service.service.impl;
 
 import com.binhphuc.common_web_starter.exception.BusinessException;
+import com.binhphuc.flash_sale_service.client.inventory.InventoryClient;
+import com.binhphuc.flash_sale_service.client.inventory.dto.request.GetStockByVariantIdsRequest;
+import com.binhphuc.flash_sale_service.client.inventory.dto.response.GetStockByVariantIdsResponse;
 import com.binhphuc.flash_sale_service.context.holder.UserContextHolder;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignItemRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignRequest;
@@ -15,9 +18,7 @@ import com.binhphuc.flash_sale_service.repository.CampaignRepository;
 import com.binhphuc.flash_sale_service.service.FlashSaleService;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     private final CampaignItemRepository campaignItemRepository;
     private final FlashSaleEventProducer flashSaleEventProducer;
     private final RedissonClient redissonClient;
+    private final InventoryClient inventoryClient;
 
     @Override
     @Transactional
@@ -55,6 +57,17 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         itemRequest.getVariantId());
             }
         }
+        List<String> variantIdsList = createCampaignRequest.getItems().stream()
+                .map(CreateCampaignItemRequest::getVariantId)
+                .toList();
+        Map<String, Long> variantIdToStock = new HashMap<>();
+        createCampaignRequest.getItems().forEach(itemRequest -> variantIdToStock.put(itemRequest.getVariantId(), itemRequest.getStock()));
+        List<GetStockByVariantIdsResponse> stockResponse = inventoryClient.getStockByVariantIds(GetStockByVariantIdsRequest.builder().variantIds(variantIdsList).build());
+        stockResponse.forEach(stock -> {
+            if (stock.getStock() < variantIdToStock.get(stock.getVariantId())) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for variant id: " + stock.getVariantId());
+            }
+        });
         Campaign newCampaign = Campaign
                 .builder()
                 .name(createCampaignRequest.getName())

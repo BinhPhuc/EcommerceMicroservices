@@ -1,10 +1,7 @@
-package com.binhphuc.inventory_service.dto.request;
+package com.binhphuc.flash_sale_service.client.inventory.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -12,7 +9,8 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetStockByVariantIdRequest {
+@Builder
+public class GetStockByVariantIdsRequest {
     @JsonProperty("variant_ids")
     private List<String> variantIds;
 }

@@ -1,4 +1,4 @@
-package com.binhphuc.inventory_service.dto.response;
+package com.binhphuc.flash_sale_service.client.inventory.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GetStockByVariantIdResponse {
+public class GetStockByVariantIdsResponse {
     @JsonProperty("variant_id")
     private String variantId;
     private Long stock;
