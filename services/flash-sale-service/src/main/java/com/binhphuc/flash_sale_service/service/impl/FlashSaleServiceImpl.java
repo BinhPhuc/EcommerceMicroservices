@@ -4,29 +4,26 @@ import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.flash_sale_service.client.inventory.InventoryClient;
 import com.binhphuc.flash_sale_service.client.inventory.dto.request.GetStockByVariantIdsRequest;
 import com.binhphuc.flash_sale_service.client.inventory.dto.response.GetStockByVariantIdsResponse;
-import com.binhphuc.flash_sale_service.context.holder.UserContextHolder;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignItemRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.response.CreateCampaignResponse;
 import com.binhphuc.flash_sale_service.dto.flash_sale.response.GetCampaignItemResponse;
 import com.binhphuc.flash_sale_service.entity.Campaign;
 import com.binhphuc.flash_sale_service.entity.CampaignItem;
-import com.binhphuc.flash_sale_service.kafka.event.FlashSaleItemReservedEvent;
-import com.binhphuc.flash_sale_service.kafka.producer.FlashSaleEventProducer;
 import com.binhphuc.flash_sale_service.repository.CampaignItemRepository;
 import com.binhphuc.flash_sale_service.repository.CampaignRepository;
 import com.binhphuc.flash_sale_service.service.FlashSaleService;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
+import com.binhphuc.flash_sale_service.service.PreWarmItemService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.redisson.api.RLock;
+import org.quartz.SchedulerException;
 import org.redisson.api.RedissonClient;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -38,15 +35,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class FlashSaleServiceImpl implements FlashSaleService {
     private final CampaignRepository campaignRepository;
     private final CampaignItemRepository campaignItemRepository;
-    private final FlashSaleEventProducer flashSaleEventProducer;
     private final RedissonClient redissonClient;
     private final InventoryClient inventoryClient;
+    private final PreWarmItemService preWarmItemService;
 
     @Override
     @Transactional
     public CreateCampaignResponse createCampaign(CreateCampaignRequest createCampaignRequest) {
         Instant startedAt = createCampaignRequest.getStartedAt();
         Instant endedAt = createCampaignRequest.getEndedAt();
+        List<String> productIds = createCampaignRequest.getItems().stream().map(CreateCampaignItemRequest::getProductId).toList();
         if (!startedAt.isBefore(endedAt)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Campaign start time must be before end time");
         }
@@ -89,6 +87,12 @@ public class FlashSaleServiceImpl implements FlashSaleService {
             return newCampaignItem;
         }).toList();
         campaignItemRepository.saveAll(campaignItemList);
+        Instant startJobTime = startedAt.minus(15, ChronoUnit.MINUTES);
+        try {
+            preWarmItemService.preWarmItem(startJobTime, productIds, variantIdsList);
+        } catch (SchedulerException e) {
+            throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to schedule pre-warm item job: " + e.getMessage());
+        }
         return CreateCampaignResponse
                 .builder()
                 .id(savedCampaign.getId())
