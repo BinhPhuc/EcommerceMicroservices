@@ -10,9 +10,10 @@ import reactor.core.publisher.Mono;
 public class RateLimiterConfig {
     @Bean
     public KeyResolver userIdKeyResolver() {
-        return exchange -> {
-            String userId = exchange.getPrincipal().cast(JwtAuthenticationToken.class).map(jwtAuth -> jwtAuth.getToken().getSubject()).toString();
-            return Mono.just(userId);
-        };
+        return exchange -> exchange
+                .getPrincipal()
+                .cast(JwtAuthenticationToken.class)
+                .map(jwtAuth -> jwtAuth.getToken().getSubject())
+                .defaultIfEmpty(exchange.getRequest().getRemoteAddress().getAddress().getHostAddress());
     }
 }
