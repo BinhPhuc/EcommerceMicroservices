@@ -2,8 +2,8 @@ package com.binhphuc.inventory_service.controller;
 
 import com.binhphuc.common_web_starter.dto.ApiResponse;
 import com.binhphuc.inventory_service.dto.request.CreateProductStockRequest;
-import com.binhphuc.inventory_service.dto.request.GetStockByVariantIdRequest;
-import com.binhphuc.inventory_service.dto.response.GetStockByVariantIdResponse;
+import com.binhphuc.inventory_service.dto.request.GetStockByVariantIdsRequest;
+import com.binhphuc.inventory_service.dto.response.GetStockByVariantIdsResponse;
 import com.binhphuc.inventory_service.service.InventoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +25,8 @@ public class InventoryController {
     }
 
     @PostMapping("/stock")
-    public ResponseEntity<ApiResponse<List<GetStockByVariantIdResponse>>> getStockByVariantId(@RequestBody GetStockByVariantIdRequest request) {
-        List<GetStockByVariantIdResponse> responseList = inventoryService.getStockByVariantId(request);
+    public ResponseEntity<ApiResponse<List<GetStockByVariantIdsResponse>>> getStockByVariantId(@RequestBody GetStockByVariantIdsRequest request) {
+        List<GetStockByVariantIdsResponse> responseList = inventoryService.getStockByVariantId(request);
         return ResponseEntity.ok(ApiResponse.success(responseList, "Stock retrieved successfully"));
     }
 }

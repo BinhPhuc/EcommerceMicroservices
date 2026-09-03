@@ -2,8 +2,8 @@ package com.binhphuc.inventory_service.service.impl;
 
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.inventory_service.dto.request.CreateProductStockRequest;
-import com.binhphuc.inventory_service.dto.request.GetStockByVariantIdRequest;
-import com.binhphuc.inventory_service.dto.response.GetStockByVariantIdResponse;
+import com.binhphuc.inventory_service.dto.request.GetStockByVariantIdsRequest;
+import com.binhphuc.inventory_service.dto.response.GetStockByVariantIdsResponse;
 import com.binhphuc.inventory_service.entity.Inventory;
 import com.binhphuc.inventory_service.repository.InventoryRepository;
 import com.binhphuc.inventory_service.service.InventoryService;
@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,13 +29,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    public List<GetStockByVariantIdResponse> getStockByVariantId(GetStockByVariantIdRequest request) {
+    public List<GetStockByVariantIdsResponse> getStockByVariantId(GetStockByVariantIdsRequest request) {
         List<Inventory> inventories = inventoryRepository.findByVariantIdIn(request.getVariantIds());
         if (inventories.size() != request.getVariantIds().size()) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "Some variant IDs not found in inventory");
         }
-        List<GetStockByVariantIdResponse> responses = inventories.stream()
-                .map(inventory -> GetStockByVariantIdResponse
+        List<GetStockByVariantIdsResponse> responses = inventories.stream()
+                .map(inventory -> GetStockByVariantIdsResponse
                         .builder()
                         .variantId(inventory.getVariantId())
                         .stock(inventory.getStock())
