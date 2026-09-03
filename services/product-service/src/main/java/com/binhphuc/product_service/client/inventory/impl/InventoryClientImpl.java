@@ -34,7 +34,7 @@ public class InventoryClientImpl implements InventoryClient {
                 .block();
 
         if (stockResponse == null) {
-            throw new BusinessException(HttpStatus.BAD_GATEWAY, "Product service is not available");
+            throw new BusinessException(HttpStatus.BAD_GATEWAY, "Inventory service is not available");
         }
     }
 }
