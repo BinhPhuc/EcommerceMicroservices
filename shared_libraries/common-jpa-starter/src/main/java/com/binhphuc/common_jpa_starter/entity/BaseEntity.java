@@ -19,26 +19,27 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 public class BaseEntity {
-  @Column(name = "is_deleted") private Boolean isDeleted;
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 
-  @CreatedDate
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private Instant createdDate;
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
-  @CreatedBy
-  @Column(name = "created_by", nullable = false, updatable = false)
-  private String createdBy;
+    @CreatedBy
+    @Column(name = "created_by", nullable = false, updatable = false)
+    private String createdBy;
 
-  @LastModifiedDate
-  @Column(name = "last_modified_at")
-  private Instant lastModifiedDate;
+    @LastModifiedDate
+    @Column(name = "last_modified_at")
+    private Instant lastModifiedAt;
 
-  @LastModifiedBy
-  @Column(name = "last_modified_by")
-  private String lastModifiedBy;
+    @LastModifiedBy
+    @Column(name = "last_modified_by")
+    private String lastModifiedBy;
 
-  @PrePersist
-  protected void onCreate() {
-    this.isDeleted = false;
-  }
+    @PrePersist
+    protected void onCreate() {
+        this.isDeleted = false;
+    }
 }
