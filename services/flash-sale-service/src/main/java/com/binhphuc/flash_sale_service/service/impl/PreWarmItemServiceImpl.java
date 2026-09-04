@@ -18,8 +18,8 @@ public class PreWarmItemServiceImpl implements PreWarmItemService {
     @Override
     public void preWarmItem(Instant startTime, List<String> productIds, List<String> variantIds) throws SchedulerException {
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(PreWarmItemConstant.productIdsKey, productIds);
-        jobDataMap.put(PreWarmItemConstant.variantIdsKey, variantIds);
+        jobDataMap.put(PreWarmItemConstant.PRODUCT_IDS_KEY, productIds);
+        jobDataMap.put(PreWarmItemConstant.VARIANT_IDS_KEY, variantIds);
         JobDetail jobDetail = JobBuilder.newJob()
                 .ofType(PreWarmItemJob.class)
                 .withIdentity("preWarmItemJob", "preWarmItemGroup")

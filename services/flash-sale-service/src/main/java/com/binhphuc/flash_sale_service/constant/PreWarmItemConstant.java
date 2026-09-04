@@ -5,6 +5,7 @@ public final class PreWarmItemConstant {
     private PreWarmItemConstant() {
     }
 
-    public static final String productIdsKey = "productIds";
-    public static final String variantIdsKey = "variantIds";
+    public static final String PRODUCT_IDS_KEY = "productIds";
+    public static final String VARIANT_IDS_KEY = "variantIds";
+
 }

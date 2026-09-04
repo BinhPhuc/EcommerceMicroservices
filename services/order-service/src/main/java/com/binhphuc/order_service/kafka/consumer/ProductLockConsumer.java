@@ -2,6 +2,7 @@ package com.binhphuc.order_service.kafka.consumer;
 
 import com.binhphuc.order_service.kafka.command.ChangeOrderStatusCommand;
 
+import com.binhphuc.order_service.kafka.constant.TopicConstant;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -18,10 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class ProductLockConsumer {
-    private final String PRODUCT_LOCKED_TOPIC = "product.lock-stock.v1";
     private final OrderService orderService;
 
-    @KafkaListener(topics = PRODUCT_LOCKED_TOPIC)
+    @KafkaListener(topics = TopicConstant.PRODUCT_LOCKED_TOPIC)
     @RetryableTopic(
             attempts = "4",
             backOff = @BackOff(delay = 2000, multiplier = 2)

@@ -19,8 +19,8 @@ public class PreWarmItemJob implements Job {
 
     @Override
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        List<String> productIds = (List<String>) jobExecutionContext.getJobDetail().getJobDataMap().get(PreWarmItemConstant.variantIdsKey);
-        List<String> variantIds = (List<String>) jobExecutionContext.getJobDetail().getJobDataMap().get(PreWarmItemConstant.variantIdsKey);
+        List<String> productIds = (List<String>) jobExecutionContext.getJobDetail().getJobDataMap().get(PreWarmItemConstant.PRODUCT_IDS_KEY);
+        List<String> variantIds = (List<String>) jobExecutionContext.getJobDetail().getJobDataMap().get(PreWarmItemConstant.VARIANT_IDS_KEY);
         if (productIds == null || variantIds == null) {
             throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Product IDs or Variant IDs is null");
         }
