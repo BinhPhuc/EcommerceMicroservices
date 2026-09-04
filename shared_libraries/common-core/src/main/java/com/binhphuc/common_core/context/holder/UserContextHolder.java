@@ -1,6 +1,6 @@
-package com.binhphuc.flash_sale_service.context.holder;
+package com.binhphuc.common_core.context.holder;
 
-import com.binhphuc.flash_sale_service.context.UserContext;
+import com.binhphuc.common_core.context.UserContext;
 
 public class UserContextHolder {
     private static final ThreadLocal<UserContext> userContextThreadLocal = new ThreadLocal<>();

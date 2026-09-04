@@ -1,4 +1,4 @@
-package com.binhphuc.api_gateway.enums;
+package com.binhphuc.common_core.enums;
 
 public enum TrustedHeader {
     X_USER_ID("X-User-Id"),

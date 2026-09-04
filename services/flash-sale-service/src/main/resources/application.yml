@@ -39,3 +39,9 @@ services:
   timeout: 5s
   inventory:
     base-url: http://inventory-service/api/v1
+  product:
+    base-url: http://product-service/api/v1
+
+common:
+  user-context:
+    required: true
