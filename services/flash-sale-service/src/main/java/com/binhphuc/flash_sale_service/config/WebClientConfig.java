@@ -3,6 +3,7 @@ package com.binhphuc.flash_sale_service.config;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,7 @@ public class WebClientConfig {
 
     @Bean(name = "inventoryClient")
     public WebClient inventoryClient(DeferringLoadBalancerExchangeFilterFunction<?> loadBalancerFilter,
-            ExchangeFilterFunction userContextPropagationFilter) {
+            @Qualifier("userContextPropagationFilter") ExchangeFilterFunction userContextPropagationFilter) {
         HttpClient httpClient = HttpClient
                 .create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
@@ -48,7 +49,7 @@ public class WebClientConfig {
 
     @Bean(name = "productClient")
     public WebClient productClient(DeferringLoadBalancerExchangeFilterFunction<?> loadBalancerFilter,
-            ExchangeFilterFunction userContextPropagationFilter) {
+            @Qualifier("userContextPropagationFilter") ExchangeFilterFunction userContextPropagationFilter) {
         HttpClient httpClient = HttpClient
                 .create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)

@@ -36,13 +36,12 @@ public class InventoryServiceImpl implements InventoryService {
         if (inventories.size() != request.getVariantIds().size()) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "Some variant IDs not found in inventory");
         }
-        List<GetStockByVariantIdsResponse> responses = inventories.stream()
+        return inventories.stream()
                 .map(inventory -> GetStockByVariantIdsResponse
                         .builder()
                         .variantId(inventory.getVariantId())
                         .stock(inventory.getStock())
                         .build())
                 .toList();
-        return responses;
     }
 }
