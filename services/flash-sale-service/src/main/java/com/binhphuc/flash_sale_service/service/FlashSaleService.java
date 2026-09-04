@@ -8,7 +8,7 @@ import com.binhphuc.flash_sale_service.dto.flash_sale.response.GetCampaignItemRe
 import org.quartz.SchedulerException;
 
 public interface FlashSaleService {
-    CreateCampaignResponse createCampaign(CreateCampaignRequest createCampaignRequest) throws SchedulerException;
+    CreateCampaignResponse createCampaign(CreateCampaignRequest createCampaignRequest);
 
     List<GetCampaignItemResponse> getItemsByCampaignId(String campaignId);
 }

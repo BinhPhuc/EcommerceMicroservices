@@ -1,5 +1,6 @@
 package com.binhphuc.flash_sale_service.kafka.event;
 
+import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleItem;
 import lombok.*;
 
 import java.util.List;
@@ -10,6 +11,5 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class PreWarmItemEvent {
-    private List<String> productIds;
-    private List<String> variantIds;
+    private List<FlashSaleItem> flashSaleItems;
 }

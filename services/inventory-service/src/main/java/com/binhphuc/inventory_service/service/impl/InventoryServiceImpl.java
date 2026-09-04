@@ -8,6 +8,7 @@ import com.binhphuc.inventory_service.entity.Inventory;
 import com.binhphuc.inventory_service.repository.InventoryRepository;
 import com.binhphuc.inventory_service.service.InventoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    @Cacheable(cacheManager = "flashSaleRedisCacheManager", value = "stock", key = "#request.getCacheKey()")
     public List<GetStockByVariantIdsResponse> getStockByVariantId(GetStockByVariantIdsRequest request) {
         List<Inventory> inventories = inventoryRepository.findByVariantIdIn(request.getVariantIds());
         if (inventories.size() != request.getVariantIds().size()) {

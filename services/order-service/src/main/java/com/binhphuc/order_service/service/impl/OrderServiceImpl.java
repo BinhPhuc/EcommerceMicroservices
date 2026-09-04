@@ -56,84 +56,85 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
-        List<String> productIds = createOrderRequest
-                .getOrderItems()
-                .stream()
-                .map(CreateOrderItemRequest::getProductId)
-                .toList();
-        List<GetProductByIdsResponse> getProductByIdsResponses = productClient
-                .getProductsByIds(GetProductByIdsRequest.builder().productIds(productIds).build());
-
-        Map<String, GetProductByIdsResponse> productIdMap = getProductByIdsResponses
-                .stream()
-                .collect(Collectors.toMap(GetProductByIdsResponse::getId, product -> product));
-
-        Order newOrder = new Order();
-        newOrder.setStatus(OrderStatus.PENDING);
-        newOrder.setCustomerId(createOrderRequest.getCustomerId());
-        newOrder.setTotalAmount(0);
-        Order savedOrder = orderRepository.save(newOrder);
-
-        List<OrderItem> orderItems = new ArrayList<>();
-
-        int totalAmount = 0;
-        for (CreateOrderItemRequest orderItemRequest : createOrderRequest.getOrderItems()) {
-            GetProductByIdsResponse product = productIdMap.get(orderItemRequest.getProductId());
-            if (product == null) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product with id " +
-                        orderItemRequest.getProductId() + " not found");
-            }
-
-            Integer quantity = orderItemRequest.getQuantity();
-            Integer stock = product.getStock();
-
-            if (stock < quantity) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
-                        " is out of stock");
-            }
-
-            Integer price = product.getPrice();
-            if (price == null) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
-                        " has no price");
-            }
-
-            totalAmount += quantity * price;
-
-            com.binhphuc.order_service.entity.OrderItem newOrderItem = com.binhphuc.order_service.entity.OrderItem
-                    .builder()
-                    .orderId(savedOrder.getId())
-                    .productId(product.getId())
-                    .quantity(quantity)
-                    .price(price)
-                    .build();
-            orderItems.add(newOrderItem);
-        }
-
-        savedOrder.setTotalAmount(totalAmount);
-        orderRepository.save(savedOrder);
-        orderItemRepository.saveAll(orderItems);
-
-        orderEventProducer
-                .sendOrderCreatedEvent(OrderCreatedEvent
-                        .builder()
-                        .orderId(savedOrder.getId())
-                        .orderItems(orderItems
-                                .stream()
-                                .map(orderItem -> com.binhphuc.order_service.kafka.event.dto.order.OrderItem
-                                        .builder()
-                                        .productId(orderItem.getProductId())
-                                        .quantity(orderItem.getQuantity())
-                                        .build()
-                                )
-                                .toList())
-                        .build());
-
-        return CreateOrderResponse
-                .builder()
-                .status(savedOrder.getStatus())
-                .totalAmount(savedOrder.getTotalAmount())
-                .build();
+        return null;
+//        List<String> productIds = createOrderRequest
+//                .getOrderItems()
+//                .stream()
+//                .map(CreateOrderItemRequest::getProductId)
+//                .toList();
+//        List<GetProductByIdsResponse> getProductByIdsResponses = productClient
+//                .getProductsByIds(GetProductByIdsRequest.builder().productIds(productIds).build());
+//
+//        Map<String, GetProductByIdsResponse> productIdMap = getProductByIdsResponses
+//                .stream()
+//                .collect(Collectors.toMap(GetProductByIdsResponse::getId, product -> product));
+//
+//        Order newOrder = new Order();
+//        newOrder.setStatus(OrderStatus.PENDING);
+//        newOrder.setCustomerId(createOrderRequest.getCustomerId());
+//        newOrder.setTotalAmount(0);
+//        Order savedOrder = orderRepository.save(newOrder);
+//
+//        List<OrderItem> orderItems = new ArrayList<>();
+//
+//        int totalAmount = 0;
+//        for (CreateOrderItemRequest orderItemRequest : createOrderRequest.getOrderItems()) {
+//            GetProductByIdsResponse product = productIdMap.get(orderItemRequest.getProductId());
+//            if (product == null) {
+//                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product with id " +
+//                        orderItemRequest.getProductId() + " not found");
+//            }
+//
+//            Integer quantity = orderItemRequest.getQuantity();
+//            Integer stock = product.getStock();
+//
+//            if (stock < quantity) {
+//                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
+//                        " is out of stock");
+//            }
+//
+//            Integer price = product.getPrice();
+//            if (price == null) {
+//                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
+//                        " has no price");
+//            }
+//
+//            totalAmount += quantity * price;
+//
+//            com.binhphuc.order_service.entity.OrderItem newOrderItem = com.binhphuc.order_service.entity.OrderItem
+//                    .builder()
+//                    .orderId(savedOrder.getId())
+//                    .productId(product.getId())
+//                    .quantity(quantity)
+//                    .price(price)
+//                    .build();
+//            orderItems.add(newOrderItem);
+//        }
+//
+//        savedOrder.setTotalAmount(totalAmount);
+//        orderRepository.save(savedOrder);
+//        orderItemRepository.saveAll(orderItems);
+//
+//        orderEventProducer
+//                .sendOrderCreatedEvent(OrderCreatedEvent
+//                        .builder()
+//                        .orderId(savedOrder.getId())
+//                        .orderItems(orderItems
+//                                .stream()
+//                                .map(orderItem -> com.binhphuc.order_service.kafka.event.dto.order.OrderItem
+//                                        .builder()
+//                                        .productId(orderItem.getProductId())
+//                                        .quantity(orderItem.getQuantity())
+//                                        .build()
+//                                )
+//                                .toList())
+//                        .build());
+//
+//        return CreateOrderResponse
+//                .builder()
+//                .status(savedOrder.getStatus())
+//                .totalAmount(savedOrder.getTotalAmount())
+//                .build();
     }
 
     @Override

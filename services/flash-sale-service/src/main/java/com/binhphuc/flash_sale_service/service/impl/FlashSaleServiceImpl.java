@@ -4,12 +4,15 @@ import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.flash_sale_service.client.inventory.InventoryClient;
 import com.binhphuc.flash_sale_service.client.inventory.dto.request.GetStockByVariantIdsRequest;
 import com.binhphuc.flash_sale_service.client.inventory.dto.response.GetStockByVariantIdsResponse;
+import com.binhphuc.flash_sale_service.client.product.ProductClient;
+import com.binhphuc.flash_sale_service.client.product.dto.request.GetFlashSaleItemRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignItemRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.response.CreateCampaignResponse;
 import com.binhphuc.flash_sale_service.dto.flash_sale.response.GetCampaignItemResponse;
 import com.binhphuc.flash_sale_service.entity.Campaign;
 import com.binhphuc.flash_sale_service.entity.CampaignItem;
+import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleItem;
 import com.binhphuc.flash_sale_service.repository.CampaignItemRepository;
 import com.binhphuc.flash_sale_service.repository.CampaignRepository;
 import com.binhphuc.flash_sale_service.service.FlashSaleService;
@@ -29,6 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,6 +41,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     private final CampaignItemRepository campaignItemRepository;
     private final RedissonClient redissonClient;
     private final InventoryClient inventoryClient;
+    private final ProductClient productClient;
     private final PreWarmItemService preWarmItemService;
 
     @Override
@@ -44,7 +49,6 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     public CreateCampaignResponse createCampaign(CreateCampaignRequest createCampaignRequest) {
         Instant startedAt = createCampaignRequest.getStartedAt();
         Instant endedAt = createCampaignRequest.getEndedAt();
-        List<String> productIds = createCampaignRequest.getItems().stream().map(CreateCampaignItemRequest::getProductId).toList();
         if (!startedAt.isBefore(endedAt)) {
             throw new BusinessException(HttpStatus.BAD_REQUEST, "Campaign start time must be before end time");
         }
@@ -74,22 +78,26 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 .endedAt(endedAt)
                 .build();
         Campaign savedCampaign = campaignRepository.save(newCampaign);
-        List<CampaignItem> campaignItemList = createCampaignRequest.getItems().stream().map(itemRequest -> {
-            CampaignItem newCampaignItem = CampaignItem
-                    .builder()
-                    .campaignId(savedCampaign.getId())
-                    .productId(itemRequest.getProductId())
-                    .variantId(itemRequest.getVariantId())
-                    .price(itemRequest.getPrice())
-                    .stock(itemRequest.getStock())
-                    .soldQuantity(0L)
-                    .build();
-            return newCampaignItem;
-        }).toList();
+        List<CampaignItem> campaignItemList = createCampaignRequest.getItems().stream().map(itemRequest ->
+                CampaignItem
+                        .builder()
+                        .campaignId(savedCampaign.getId())
+                        .productId(itemRequest.getProductId())
+                        .variantId(itemRequest.getVariantId())
+                        .price(itemRequest.getPrice())
+                        .stock(itemRequest.getStock())
+                        .soldQuantity(0L)
+                        .build()
+        ).toList();
         campaignItemRepository.saveAll(campaignItemList);
         Instant startJobTime = startedAt.minus(15, ChronoUnit.MINUTES);
+        List<FlashSaleItem> flashSaleItems = createCampaignRequest.getItems().stream().map(itemRequest -> FlashSaleItem
+                .builder()
+                .productId(itemRequest.getProductId())
+                .variantId(itemRequest.getVariantId())
+                .build()).toList();
         try {
-            preWarmItemService.preWarmItem(startJobTime, productIds, variantIdsList);
+            preWarmItemService.preWarmItem(startJobTime, flashSaleItems);
         } catch (SchedulerException e) {
             throw new BusinessException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to schedule pre-warm item job: " + e.getMessage());
         }
@@ -108,6 +116,17 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         if (!campaignRepository.existsByIdAndIsDeletedFalse(campaignId)) {
             throw new BusinessException(HttpStatus.NOT_FOUND, "Campaign not found with id: " + campaignId);
         }
+        List<CampaignItem> campaignItems = campaignItemRepository.findByCampaignIdAndIsDeletedFalse(campaignId);
+        List<com.binhphuc.flash_sale_service.client.product.dto.request.FlashSaleItem> flashSaleItems = campaignItems.stream().map(campaignItem -> com.binhphuc.flash_sale_service.client.product.dto.request.FlashSaleItem
+                .builder()
+                .productId(campaignItem.getProductId())
+                .variantId(campaignItem.getVariantId())
+                .build()).toList();
+        GetFlashSaleItemRequest request = GetFlashSaleItemRequest
+                .builder()
+                .flashSaleItems(flashSaleItems)
+                .build();
+        productClient.getFlashSaleItems(request);
         return campaignItemRepository
                 .findByCampaignIdAndIsDeletedFalse(campaignId)
                 .stream()

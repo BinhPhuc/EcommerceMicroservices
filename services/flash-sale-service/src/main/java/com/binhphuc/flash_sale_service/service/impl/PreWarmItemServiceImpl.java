@@ -1,6 +1,7 @@
 package com.binhphuc.flash_sale_service.service.impl;
 
 import com.binhphuc.flash_sale_service.constant.PreWarmItemConstant;
+import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleItem;
 import com.binhphuc.flash_sale_service.schedule.PreWarmItemJob;
 import com.binhphuc.flash_sale_service.service.PreWarmItemService;
 import lombok.RequiredArgsConstructor;
@@ -16,10 +17,9 @@ public class PreWarmItemServiceImpl implements PreWarmItemService {
     private final Scheduler scheduler;
 
     @Override
-    public void preWarmItem(Instant startTime, List<String> productIds, List<String> variantIds) throws SchedulerException {
+    public void preWarmItem(Instant startTime, List<FlashSaleItem> flashSaleItems) throws SchedulerException {
         JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(PreWarmItemConstant.PRODUCT_IDS_KEY, productIds);
-        jobDataMap.put(PreWarmItemConstant.VARIANT_IDS_KEY, variantIds);
+        jobDataMap.put(PreWarmItemConstant.FLASH_SALE_ITEMS_KEY, flashSaleItems);
         JobDetail jobDetail = JobBuilder.newJob()
                 .ofType(PreWarmItemJob.class)
                 .withIdentity("preWarmItemJob", "preWarmItemGroup")

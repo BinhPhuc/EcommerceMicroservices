@@ -31,6 +31,7 @@ public class CreateProductRequest {
 
     private List<CreateProductImageRequest> images;
 
+    // TODO: 1 product should have multiple variants, so we should change this to a list of variants
     private CreateProductVariantRequest variant;
 
     private Integer stock;
