@@ -12,6 +12,6 @@ public class PreWarmItemProducer {
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public void sendPreWarmItemEvent(PreWarmItemEvent event) {
-        kafkaTemplate.send(TopicConstant.FLASH_SALE_PRE_WARM_TOPIC, event);
+        kafkaTemplate.send(TopicConstant.PRE_WARM_ITEM_TOPIC, event);
     }
 }
