@@ -22,19 +22,19 @@ services:
     networks:
       - ecom-net
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    restart: always
-    environment:
-      KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:9092
-    ports:
-      - "8081:8080"
-    depends_on:
-      - broker
-    networks:
-      - ecom-net
+  # kafka-ui:
+  #   image: provectuslabs/kafka-ui:latest
+  #   container_name: kafka-ui
+  #   restart: always
+  #   environment:
+  #     KAFKA_CLUSTERS_0_NAME: local
+  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:9092
+  #   ports:
+  #     - "8081:8080"
+  #   depends_on:
+  #     - broker
+  #   networks:
+  #     - ecom-net
 
   redis-server:
     image: redis:8.4-alpine
@@ -95,6 +95,7 @@ services:
       KC_DB_URL: jdbc:mysql://mysql:3306/keycloak
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin_password
+      KC_HOSTNAME_STRICT_HTTPS: false
       KC_HOSTNAME: localhost
     command: start-dev
     depends_on:
@@ -134,37 +135,37 @@ services:
       retries: 5
       start_period: 60s
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:9.4.4
-    container_name: logstash
-    restart: always
-    volumes:
-      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    ports:
-      - "5044:5044"
-      - "5000:5000/tcp"
-      - "5000:5000/udp"
-    environment:
-      LS_JAVA_OPTS: "-Xms256m -Xmx256m"
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - ecom-net
+  # logstash:
+  #   image: docker.elastic.co/logstash/logstash:9.4.4
+  #   container_name: logstash
+  #   restart: always
+  #   volumes:
+  #     - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+  #   ports:
+  #     - "5044:5044"
+  #     - "5000:5000/tcp"
+  #     - "5000:5000/udp"
+  #   environment:
+  #     LS_JAVA_OPTS: "-Xms256m -Xmx256m"
+  #   depends_on:
+  #     elasticsearch:
+  #       condition: service_healthy
+  #   networks:
+  #     - ecom-net
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:9.4.4
-    container_name: kibana
-    restart: always
-    ports:
-      - "5601:5601"
-    environment:
-      ELASTICSEARCH_HOSTS: http://elasticsearch:9200
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
-    networks:
-      - ecom-net
+  # kibana:
+  #   image: docker.elastic.co/kibana/kibana:9.4.4
+  #   container_name: kibana
+  #   restart: always
+  #   ports:
+  #     - "5601:5601"
+  #   environment:
+  #     ELASTICSEARCH_HOSTS: http://elasticsearch:9200
+  #   depends_on:
+  #     elasticsearch:
+  #       condition: service_healthy
+  #   networks:
+  #     - ecom-net
 
 volumes:
   redis_insight_data:
