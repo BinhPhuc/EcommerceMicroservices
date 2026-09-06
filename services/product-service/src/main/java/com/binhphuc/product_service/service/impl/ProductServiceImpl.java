@@ -172,7 +172,7 @@ public class ProductServiceImpl implements ProductService {
                 productIdToProductVariant.put(productVariant.getProductId(), productVariant));
         getStockByVariantIdsResponses.forEach(response ->
                 variantIdToStock.put(response.getVariantId(), response.getStock()));
-        List<GetProductResponse> responses = products.stream().map(product ->
+        return products.stream().map(product ->
                 GetProductResponse
                         .builder()
                         .name(product.getName())
@@ -183,7 +183,6 @@ public class ProductServiceImpl implements ProductService {
                         .stock(variantIdToStock.get(productIdToProductVariant.get(product.getId()).getId()))
                         .build()
         ).toList();
-        return responses;
     }
 
     @Override

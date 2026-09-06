@@ -90,7 +90,9 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .build()
         ).toList();
         campaignItemRepository.saveAll(campaignItemList);
-        Instant startJobTime = startedAt.minus(15, ChronoUnit.MINUTES);
+        // TODO: for testing pre-warm item job, set startJobTime = Instant.now().plus(1, ChronoUnit.MINUTES);
+        // Instant startJobTime = startedAt.minus(15, ChronoUnit.MINUTES);
+        Instant startJobTime = Instant.now().plus(2, ChronoUnit.MINUTES);
         List<FlashSaleItem> flashSaleItems = createCampaignRequest.getItems().stream().map(itemRequest -> FlashSaleItem
                 .builder()
                 .productId(itemRequest.getProductId())
