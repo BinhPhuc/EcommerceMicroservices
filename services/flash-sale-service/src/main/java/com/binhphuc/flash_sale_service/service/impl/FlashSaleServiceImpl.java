@@ -184,7 +184,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         List<OrderItem> orderItems = createOrderRequest.getItems();
         orderItems.forEach(orderItem -> {
             String soldOutCacheKey =
-                    CacheHelper.createCacheKey(PreWarmItemConstant.SOLD_STATUS_CACHE_KEY,
+                    CacheHelper.createCacheKey(PreWarmItemConstant.SOLD_STATUS_PRIMARY_CACHE_KEY,
                             List.of(orderItem.getVariantId()));
             SoldStatus soldStatus = cache.get(soldOutCacheKey, SoldStatus.class);
             if (soldStatus.isSoldOut()) {
