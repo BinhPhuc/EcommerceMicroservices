@@ -17,6 +17,9 @@ public class GetFlashSaleItemRequest {
     @JsonProperty("flash_sale_items")
     List<FlashSaleItem> flashSaleItems;
 
+    @JsonProperty("campaign_id")
+    private String campaignId;
+
     @JsonIgnore
     public String getCacheKey() {
         return flashSaleItems.stream().map(item -> item.getProductId()).sorted().collect(Collectors.joining(","));

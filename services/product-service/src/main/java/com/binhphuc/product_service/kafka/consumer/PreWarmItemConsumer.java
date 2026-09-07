@@ -24,6 +24,6 @@ public class PreWarmItemConsumer {
             exclude = {IllegalArgumentException.class, IllegalStateException.class}
     )
     public void consumePreWarmItemEvent(PreWarmItemEvent event) {
-        preWarmItemService.preWarmItem(PreWarmItemCommand.builder().flashSaleItems(event.getFlashSaleItems()).build());
+        preWarmItemService.preWarmItem(PreWarmItemCommand.builder().flashSaleItems(event.getFlashSaleItems()).campaignId(event.getCampaignId()).build());
     }
 }

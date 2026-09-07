@@ -12,4 +12,5 @@ import java.util.List;
 @Builder
 public class PreWarmItemCommand {
     private List<FlashSaleItem> flashSaleItems;
+    private String campaignId;
 }

@@ -34,11 +34,10 @@ public class CacheConfig {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(GenericJacksonJsonRedisSerializer.builder().build()))
                 .disableCachingNullValues();
-        RedisCacheManager cacheManager = RedisCacheManager
+        return RedisCacheManager
                 .builder(connectionFactory)
                 .cacheDefaults(cacheConfiguration)
                 .transactionAware()
                 .build();
-        return cacheManager;
     }
 }

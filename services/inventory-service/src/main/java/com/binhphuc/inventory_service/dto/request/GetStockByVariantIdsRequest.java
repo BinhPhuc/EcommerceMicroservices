@@ -18,6 +18,9 @@ public class GetStockByVariantIdsRequest {
     @JsonProperty("variant_ids")
     private List<String> variantIds;
 
+    @JsonProperty("campaign_id")
+    private String campaignId;
+
     @JsonIgnore
     public String getCacheKey() {
         return variantIds.stream().sorted().collect(Collectors.joining(","));

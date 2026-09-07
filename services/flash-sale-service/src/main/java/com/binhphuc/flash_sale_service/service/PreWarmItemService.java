@@ -7,5 +7,5 @@ import java.time.Instant;
 import java.util.List;
 
 public interface PreWarmItemService {
-    void preWarmItem(Instant startTime, List<FlashSaleItem> flashSaleItems) throws SchedulerException;
+    void preWarmItem(Instant startTime, List<FlashSaleItem> flashSaleItems, String campaignId) throws SchedulerException;
 }

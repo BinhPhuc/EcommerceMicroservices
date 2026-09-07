@@ -152,8 +152,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(cacheable = {
-            @Cacheable(cacheManager = "caffeineCacheManager", value = "products", key = "#getFlashSaleItemRequest.getCacheKey()"),
-            @Cacheable(cacheManager = "redisCacheManager", value = "products", key = "#getFlashSaleItemRequest.getCacheKey()")
+            @Cacheable(cacheManager = "caffeineCacheManager", value = "products", key = "#getFlashSaleItemRequest.getCampaignId()"),
+            @Cacheable(cacheManager = "flashSaleRedisCacheManager", value = "products", key = "#getFlashSaleItemRequest.getCampaignId()")
     })
     public List<GetProductResponse> getFlashSaleItems(GetFlashSaleItemRequest getFlashSaleItemRequest) {
         List<String> productIds = new ArrayList<>();
@@ -162,7 +162,7 @@ public class ProductServiceImpl implements ProductService {
             productIds.add(flashSaleItem.getProductId());
             variantIds.add(flashSaleItem.getVariantId());
         });
-        List<GetStockByVariantIdsResponse> getStockByVariantIdsResponses = inventoryClient.getStock(GetStockByVariantIdsRequest.builder().variantIds(variantIds).build());
+        List<GetStockByVariantIdsResponse> getStockByVariantIdsResponses = inventoryClient.getStock(GetStockByVariantIdsRequest.builder().variantIds(variantIds).campaignId(getFlashSaleItemRequest.getCampaignId()).build());
         List<Product> products = productRepository.findByIdIn(productIds);
         List<ProductVariant> productVariants = productVariantRepository.findByIdIn(variantIds);
         // TODO: 1 product has only 1 variant, must change this later

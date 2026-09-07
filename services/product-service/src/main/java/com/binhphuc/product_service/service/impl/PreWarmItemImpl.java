@@ -20,6 +20,7 @@ public class PreWarmItemImpl implements PreWarmItemService {
     @Override
     public void preWarmItem(PreWarmItemCommand command) {
         List<FlashSaleItem> flashSaleItems = command.getFlashSaleItems();
+        String campaignId = command.getCampaignId();
         productService.getFlashSaleItems(GetFlashSaleItemRequest
                 .builder()
                 .flashSaleItems(flashSaleItems.stream()
@@ -28,6 +29,7 @@ public class PreWarmItemImpl implements PreWarmItemService {
                                 .variantId(item.getVariantId())
                                 .build())
                         .toList())
+                .campaignId(campaignId)
                 .build());
     }
 }

@@ -11,11 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateOrderRequest {
-    @JsonProperty("campaign_id")
-    private String campaignId;
-
-    private String customerId;
-
     @JsonProperty("items")
     private List<OrderItem> items;
 }

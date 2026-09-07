@@ -30,7 +30,7 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    @Cacheable(cacheManager = "flashSaleRedisCacheManager", value = "stock", key = "#request.getCacheKey()")
+    @Cacheable(cacheManager = "flashSaleRedisCacheManager", value = "stock", key = "#request.getCampaignId()")
     public List<GetStockByVariantIdsResponse> getStockByVariantId(GetStockByVariantIdsRequest request) {
         List<Inventory> inventories = inventoryRepository.findByVariantIdIn(request.getVariantIds());
         if (inventories.size() != request.getVariantIds().size()) {

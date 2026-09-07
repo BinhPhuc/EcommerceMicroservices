@@ -34,11 +34,25 @@ public class CacheConfig {
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(GenericJacksonJsonRedisSerializer.builder().build()))
                 .disableCachingNullValues();
-        RedisCacheManager cacheManager = RedisCacheManager
+        return RedisCacheManager
                 .builder(connectionFactory)
                 .cacheDefaults(cacheConfiguration)
                 .transactionAware()
                 .build();
-        return cacheManager;
+    }
+    @Bean(name = "flashSaleRedisCacheManager")
+    @Primary
+    public RedisCacheManager flashSaleRedisCacheManager(RedisConnectionFactory connectionFactory) {
+        RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration
+                .defaultCacheConfig()
+                .entryTtl(java.time.Duration.ofMinutes(75))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(GenericJacksonJsonRedisSerializer.builder().build()))
+                .disableCachingNullValues();
+        return RedisCacheManager
+                .builder(connectionFactory)
+                .cacheDefaults(cacheConfiguration)
+                .transactionAware()
+                .build();
     }
 }

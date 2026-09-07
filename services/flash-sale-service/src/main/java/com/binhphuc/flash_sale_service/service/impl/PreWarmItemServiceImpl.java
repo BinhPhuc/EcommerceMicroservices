@@ -17,17 +17,19 @@ public class PreWarmItemServiceImpl implements PreWarmItemService {
     private final Scheduler scheduler;
 
     @Override
-    public void preWarmItem(Instant startTime, List<FlashSaleItem> flashSaleItems) throws SchedulerException {
+    public void preWarmItem(Instant startTime, List<FlashSaleItem> flashSaleItems,
+                            String campaignId) throws SchedulerException {
         JobDataMap jobDataMap = new JobDataMap();
         jobDataMap.put(PreWarmItemConstant.FLASH_SALE_ITEMS_KEY, flashSaleItems);
+        jobDataMap.put(PreWarmItemConstant.CAMPAIGN_ID_KEY, campaignId);
         JobDetail jobDetail = JobBuilder.newJob()
                 .ofType(PreWarmItemJob.class)
-                .withIdentity("preWarmItemJob", "preWarmItemGroup")
+                .withIdentity("preWarmItemJob-" + campaignId, "preWarmItemGroup")
                 .setJobData(jobDataMap)
                 .build();
         Trigger trigger = TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
-                .withIdentity("preWarmItemTrigger", "preWarmItemGroup")
+                .withIdentity("preWarmItemTrigger-" + campaignId, "preWarmItemGroup")
                 .startAt(startTime)
                 .build();
         scheduler.scheduleJob(jobDetail, trigger);

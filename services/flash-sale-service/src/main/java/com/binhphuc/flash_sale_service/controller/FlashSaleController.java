@@ -4,7 +4,6 @@ import com.binhphuc.common_web_starter.dto.ApiResponse;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.response.CreateCampaignResponse;
 import com.binhphuc.flash_sale_service.dto.order.request.CreateOrderRequest;
-import com.binhphuc.flash_sale_service.dto.order.response.CreateOrderResponse;
 import com.binhphuc.flash_sale_service.service.FlashSaleService;
 
 import com.binhphuc.flash_sale_service.service.PreWarmItemService;
@@ -45,9 +44,10 @@ public class FlashSaleController {
     }
 
     @PostMapping("/campaign/{campaignId}/order")
-    public ResponseEntity<ApiResponse<Void>> createOrder(@Valid @RequestBody CreateOrderRequest createOrderRequest) {
-        log.info("Creating order for campaign id: {}", createOrderRequest.getCampaignId());
-        flashSaleService.createOrder(createOrderRequest);
+    public ResponseEntity<ApiResponse<Void>> createOrder(@Valid @RequestBody CreateOrderRequest createOrderRequest,
+                                                         @PathVariable String campaignId) {
+        log.info("Creating order for campaign id: {}", campaignId);
+        flashSaleService.createOrder(createOrderRequest, campaignId);
         return ResponseEntity.ok(ApiResponse.success(null, "Order created successfully"));
     }
 }
