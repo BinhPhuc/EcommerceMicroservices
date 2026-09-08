@@ -40,8 +40,8 @@ public class CacheConfig {
                 .transactionAware()
                 .build();
     }
+
     @Bean(name = "flashSaleRedisCacheManager")
-    @Primary
     public RedisCacheManager flashSaleRedisCacheManager(RedisConnectionFactory connectionFactory) {
         RedisCacheConfiguration cacheConfiguration = RedisCacheConfiguration
                 .defaultCacheConfig()

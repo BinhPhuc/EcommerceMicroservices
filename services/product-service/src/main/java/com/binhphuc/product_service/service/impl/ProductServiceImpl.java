@@ -89,14 +89,13 @@ public class ProductServiceImpl implements ProductService {
                 .build();
         Product savedProduct = productRepository.save(newProduct);
         List<ProductImage> productImageList = productRequest.getImages().stream().map(productImage -> {
-            ProductImage newProductImage = ProductImage
+            return ProductImage
                     .builder()
                     .productId(savedProduct.getId())
                     .url(productImage.getUrl())
                     .isThumbnail(productImage.getIsThumbnail())
                     .displayOrder(productImage.getDisplayOrder())
                     .build();
-            return newProductImage;
         }).toList();
         productImageRepository.saveAll(productImageList);
         ProductVariant newProductVariant = ProductVariant

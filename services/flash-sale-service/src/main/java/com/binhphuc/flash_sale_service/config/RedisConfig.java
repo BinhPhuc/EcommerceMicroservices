@@ -14,15 +14,16 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 public class RedisConfig {
     @Bean
-    MessageListenerAdapter soldOutMessageListener() {
-        return new MessageListenerAdapter(new SoldOutMessageSubscriber());
+    MessageListenerAdapter soldOutMessageListener(SoldOutMessageSubscriber soldOutMessageSubscriber) {
+        return new MessageListenerAdapter(soldOutMessageSubscriber);
     }
 
     @Bean
-    RedisMessageListenerContainer redisContainer(RedisConnectionFactory redisConnectionFactory) {
+    RedisMessageListenerContainer redisContainer(RedisConnectionFactory redisConnectionFactory,
+                                                 MessageListenerAdapter soldOutMessageListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
-        container.addMessageListener(soldOutMessageListener(), soldOutTopic());
+        container.addMessageListener(soldOutMessageListener, soldOutTopic());
         return container;
     }
 

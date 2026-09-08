@@ -43,6 +43,7 @@ public class CacheConfig {
                 .builder(connectionFactory)
                 .cacheDefaults(cacheConfiguration)
                 .transactionAware()
+                .allowCreateOnMissingCache(true)
                 .build();
     }
 }

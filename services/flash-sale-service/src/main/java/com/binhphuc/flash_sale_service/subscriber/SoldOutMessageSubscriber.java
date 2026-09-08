@@ -3,6 +3,7 @@ package com.binhphuc.flash_sale_service.subscriber;
 import com.binhphuc.flash_sale_service.constant.PreWarmItemConstant;
 import com.binhphuc.flash_sale_service.helper.CacheHelper;
 import com.binhphuc.flash_sale_service.schedule.dto.SoldStatus;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.Nullable;
