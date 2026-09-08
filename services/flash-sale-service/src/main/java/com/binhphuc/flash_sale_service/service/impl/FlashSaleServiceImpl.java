@@ -71,20 +71,6 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         itemRequest.getVariantId());
             }
         }
-        List<String> variantIdsList = createCampaignRequest.getItems().stream()
-                .map(CreateCampaignItemRequest::getVariantId)
-                .toList();
-        Map<String, Long> variantIdToStock = new HashMap<>();
-        createCampaignRequest.getItems().forEach(itemRequest -> variantIdToStock.put(itemRequest.getVariantId(),
-                itemRequest.getStock()));
-        List<GetStockByVariantIdsResponse> stockResponse =
-                inventoryClient.getStockByVariantIds(GetStockByVariantIdsRequest.builder().variantIds(variantIdsList).build());
-        stockResponse.forEach(stock -> {
-            if (stock.getStock() < variantIdToStock.get(stock.getVariantId())) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for " +
-                        "variant id: " + stock.getVariantId());
-            }
-        });
         Campaign newCampaign = Campaign
                 .builder()
                 .name(createCampaignRequest.getName())
@@ -94,6 +80,20 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 .build();
         Campaign savedCampaign = campaignRepository.save(newCampaign);
         String campaignId = savedCampaign.getId();
+        List<String> variantIdsList = createCampaignRequest.getItems().stream()
+                .map(CreateCampaignItemRequest::getVariantId)
+                .toList();
+        Map<String, Long> variantIdToStock = new HashMap<>();
+        createCampaignRequest.getItems().forEach(itemRequest -> variantIdToStock.put(itemRequest.getVariantId(),
+                itemRequest.getStock()));
+        List<GetStockByVariantIdsResponse> stockResponse =
+                inventoryClient.getStockByVariantIds(GetStockByVariantIdsRequest.builder().variantIds(variantIdsList).campaignId(campaignId).build());
+        stockResponse.forEach(stock -> {
+            if (stock.getStock() < variantIdToStock.get(stock.getVariantId())) {
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for " +
+                        "variant id: " + stock.getVariantId());
+            }
+        });
         List<CampaignItem> campaignItemList =
                 createCampaignRequest.getItems().stream().map(itemRequest ->
                         CampaignItem

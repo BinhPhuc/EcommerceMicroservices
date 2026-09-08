@@ -10,14 +10,12 @@ import com.binhphuc.inventory_service.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -44,19 +42,16 @@ public class InventoryServiceImpl implements InventoryService {
         Cache cache = redisCacheManager.getCache(CACHE_NAME);
         List<GetStockByVariantIdsResponse> response = new ArrayList<>();
         variantIds.forEach(variantId -> {
-            String cacheKey = getCacheKey(CACHE_NAME, campaignId, variantId);
+            String cacheKey = new StringBuilder(campaignId).append(":").append(variantId).toString();
             Long stock = cache.get(cacheKey, Long.class);
             if (stock == null) {
                 Inventory inventory =
                         inventoryRepository.findByVariantId(variantId).orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Variant ID " + variantId + " not found in inventory"));
-                cache.put(cacheKey, inventory.getStock());
+                stock = inventory.getStock();
+                cache.put(cacheKey, stock);
             }
             response.add(GetStockByVariantIdsResponse.builder().variantId(variantId).stock(stock).build());
         });
         return response;
-    }
-
-    private String getCacheKey(String cacheName, String campaignId, String variantId) {
-        return new StringBuilder(cacheName).append(":").append(campaignId).append(":").append(variantId).toString();
     }
 }
