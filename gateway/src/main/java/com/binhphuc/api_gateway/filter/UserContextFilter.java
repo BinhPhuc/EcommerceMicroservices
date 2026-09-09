@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class UserContextFilter implements GlobalFilter, Ordered {
@@ -29,6 +30,7 @@ public class UserContextFilter implements GlobalFilter, Ordered {
                     .headers(httpHeaders -> trustedHeaders.forEach(httpHeaders::remove))
                     .header(TrustedHeader.X_USER_ID.getHeaderName(), userId)
                     .header(TrustedHeader.X_USER_NAME.getHeaderName(), username != null ? username : "")
+                    .header(TrustedHeader.X_REQUEST_ID.getHeaderName(), UUID.randomUUID().toString())
                     .build();
             return exchange.mutate().request(mutatedRequest).build();
         }).defaultIfEmpty(exchange).flatMap(chain::filter);

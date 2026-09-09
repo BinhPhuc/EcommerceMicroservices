@@ -4,7 +4,8 @@ USE orders;
 
 CREATE TABLE IF NOT EXISTS orders (
     id                  VARCHAR(36)  NOT NULL,
-    user_id             VARCHAR(36),                 -- -> user_service.users.id
+    idempotency_key     VARCHAR(36),
+    user_id             VARCHAR(36),
     total_amount        DECIMAL(19,2),
     status              VARCHAR(255),
     payment_method      VARCHAR(255),
@@ -13,7 +14,8 @@ CREATE TABLE IF NOT EXISTS orders (
     last_modified_by    VARCHAR(36),
     last_modified_at    TIMESTAMP    NOT NULL,
     is_deleted          BOOLEAN      NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_orders_idempotency_key (idempotency_key)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS order_snapshots (

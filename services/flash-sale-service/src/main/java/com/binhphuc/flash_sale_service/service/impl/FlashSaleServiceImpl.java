@@ -1,5 +1,7 @@
 package com.binhphuc.flash_sale_service.service.impl;
 
+import com.binhphuc.common_core.context.UserContext;
+import com.binhphuc.common_core.context.holder.UserContextHolder;
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.flash_sale_service.client.inventory.InventoryClient;
 import com.binhphuc.flash_sale_service.client.inventory.dto.request.GetStockByVariantIdsRequest;
@@ -20,7 +22,10 @@ import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleItem;
 import com.binhphuc.flash_sale_service.repository.CampaignItemRepository;
 import com.binhphuc.flash_sale_service.repository.CampaignRepository;
 import com.binhphuc.flash_sale_service.schedule.dto.SoldStatus;
+import com.binhphuc.flash_sale_service.kafka.event.FlashSaleOrderCreatedEvent;
+import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleOrderItem;
 import com.binhphuc.flash_sale_service.service.FlashSaleService;
+import com.binhphuc.flash_sale_service.service.OrderReservationService;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -38,6 +43,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -51,6 +57,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     private final InventoryClient inventoryClient;
     private final ProductClient productClient;
     private final PreWarmItemService preWarmItemService;
+    private final OrderReservationService orderReservationService;
     @Qualifier("caffeineCacheManager")
     private final CacheManager cacheManger;
 
@@ -171,26 +178,59 @@ public class FlashSaleServiceImpl implements FlashSaleService {
     public void createOrder(CreateOrderRequest createOrderRequest, String campaignId) {
         List<CampaignItem> campaignItems =
                 campaignItemRepository.findByCampaignIdAndIsDeletedFalse(campaignId);
-        Map<String, Boolean> existedItems = new HashMap<>();
-        campaignItems.forEach(item -> existedItems.put(item.getVariantId(), true));
-        createOrderRequest.getItems().forEach(orderItem -> {
-            if (!existedItems.containsKey(orderItem.getVariantId())) {
+        Map<String, CampaignItem> variantIdToCampaignItem = new HashMap<>();
+        campaignItems.forEach(campaignItem -> variantIdToCampaignItem.put(campaignItem.getVariantId(),
+                campaignItem));
+        List<OrderItem> orderItems = createOrderRequest.getItems();
+        orderItems.forEach(orderItem -> {
+            if (!variantIdToCampaignItem.containsKey(orderItem.getVariantId())) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST,
                         "Variant id: " + orderItem.getVariantId() + " is not part of campaign " +
                                 "id: " + campaignId);
             }
         });
         Cache cache = cacheManger.getCache(PreWarmItemConstant.SOLD_STATUS_CACHE_NAME);
-        List<OrderItem> orderItems = createOrderRequest.getItems();
         orderItems.forEach(orderItem -> {
             String soldOutCacheKey =
                     CacheHelper.createCacheKey(PreWarmItemConstant.SOLD_STATUS_PRIMARY_CACHE_KEY,
                             List.of(orderItem.getVariantId()));
             SoldStatus soldStatus = cache.get(soldOutCacheKey, SoldStatus.class);
-            if (soldStatus.isSoldOut()) {
+            if (soldStatus != null && soldStatus.isSoldOut()) {
                 throw new BusinessException(HttpStatus.CONFLICT,
                         "Variant id: " + orderItem.getVariantId() + " is sold out");
             }
         });
+        orderReservationService.reserve(buildOrderCreatedEvent(orderItems,
+                variantIdToCampaignItem, campaignId));
+    }
+
+    private FlashSaleOrderCreatedEvent buildOrderCreatedEvent(List<OrderItem> orderItems,
+                                                              Map<String, CampaignItem> variantIdToCampaignItem,
+                                                              String campaignId) {
+        UserContext userContext = UserContextHolder.getUserContext();
+        if (userContext == null || !StringUtils.hasText(userContext.getRequestId())) {
+            throw new BusinessException(HttpStatus.UNAUTHORIZED, "Missing user context");
+        }
+        List<FlashSaleOrderItem> items = orderItems.stream()
+                .map(orderItem -> {
+                    CampaignItem campaignItem =
+                            variantIdToCampaignItem.get(orderItem.getVariantId());
+                    return FlashSaleOrderItem
+                            .builder()
+                            .productId(campaignItem.getProductId())
+                            .variantId(campaignItem.getVariantId())
+                            .quantity(orderItem.getQuantity())
+                            .price(campaignItem.getPrice())
+                            .build();
+                })
+                .toList();
+        return FlashSaleOrderCreatedEvent
+                .builder()
+                .requestId(userContext.getRequestId())
+                .userId(userContext.getUserId())
+                .campaignId(campaignId)
+                .createdAt(Instant.now())
+                .items(items)
+                .build();
     }
 }

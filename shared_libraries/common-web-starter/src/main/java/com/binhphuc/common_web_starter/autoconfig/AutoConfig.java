@@ -42,6 +42,7 @@ public class AutoConfig {
             return next.exchange(ClientRequest.from(request)
                     .header(TrustedHeader.X_USER_ID.getHeaderName(), userContext.getUserId())
                     .header(TrustedHeader.X_USER_NAME.getHeaderName(), userContext.getUsername())
+                    .header(TrustedHeader.X_REQUEST_ID.getHeaderName(), userContext.getRequestId())
                     .build());
         };
     }

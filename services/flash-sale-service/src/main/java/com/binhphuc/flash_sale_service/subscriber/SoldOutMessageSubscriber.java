@@ -15,6 +15,7 @@ import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 
@@ -28,7 +29,7 @@ public class SoldOutMessageSubscriber implements MessageListener {
 
     @Override
     public void onMessage(Message message, byte @Nullable [] pattern) {
-        SoldStatus soldStatus = parseMessage(message.getBody().toString());
+        SoldStatus soldStatus = parseMessage(new String(message.getBody(), StandardCharsets.UTF_8));
         if (soldStatus == null) {
             log.error("Received null SoldStatus from message: {}", message);
             return;

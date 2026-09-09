@@ -45,3 +45,7 @@ services:
 common:
   user-context:
     required: true
+
+flash-sale:
+  outbox:
+    recovery-delay: 10000

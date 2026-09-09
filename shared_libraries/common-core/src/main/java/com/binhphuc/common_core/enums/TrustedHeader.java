@@ -2,7 +2,8 @@ package com.binhphuc.common_core.enums;
 
 public enum TrustedHeader {
     X_USER_ID("X-User-Id"),
-    X_USER_NAME("X-User-Name");
+    X_USER_NAME("X-User-Name"),
+    X_REQUEST_ID("X-Request-Id");
 
     private final String headerName;
 

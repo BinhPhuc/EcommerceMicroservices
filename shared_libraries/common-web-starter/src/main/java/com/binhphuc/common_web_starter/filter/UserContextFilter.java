@@ -34,18 +34,21 @@ public class UserContextFilter extends OncePerRequestFilter {
             FilterChain filterChain) throws ServletException, IOException {
         String userId = request.getHeader(TrustedHeader.X_USER_ID.getHeaderName());
         String username = request.getHeader(TrustedHeader.X_USER_NAME.getHeaderName());
-        if (!requireHeader(userId) || !requireHeader(username)) {
+        String requestId = request.getHeader(TrustedHeader.X_REQUEST_ID.getHeaderName());
+        if (!requireHeader(userId) || !requireHeader(username) || !requireHeader(requestId)) {
             if (userContextProperties.isRequired()) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
                         "Missing required headers: " + TrustedHeader.X_USER_ID.getHeaderName() + ", "
-                                + TrustedHeader.X_USER_NAME.getHeaderName());
+                                + TrustedHeader.X_USER_NAME.getHeaderName() + ", "
+                                + TrustedHeader.X_REQUEST_ID.getHeaderName());
                 return;
             }
             filterChain.doFilter(request, response);
             return;
         }
         try {
-            UserContext userContext = UserContext.builder().userId(userId).username(username).build();
+            UserContext userContext =
+                    UserContext.builder().userId(userId).username(username).requestId(requestId).build();
             UserContextHolder.setUserContext(userContext);
             filterChain.doFilter(request, response);
         } finally {
