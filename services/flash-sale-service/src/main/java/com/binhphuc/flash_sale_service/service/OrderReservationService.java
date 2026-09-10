@@ -1,9 +1,9 @@
 package com.binhphuc.flash_sale_service.service;
 
-import com.binhphuc.flash_sale_service.kafka.event.FlashSaleOrderCreatedEvent;
+import com.binhphuc.flash_sale_service.kafka.event.FlashSaleCreateOrderEvent;
 
 public interface OrderReservationService {
-    void reserve(FlashSaleOrderCreatedEvent event);
+    void reserve(FlashSaleCreateOrderEvent event);
 
-    void release(FlashSaleOrderCreatedEvent event);
+    void release(FlashSaleCreateOrderEvent event);
 }

@@ -1,9 +1,8 @@
-package com.binhphuc.flash_sale_service.kafka.event;
+package com.binhphuc.order_service.kafka.command;
 
-import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleOrderItem;
+import com.binhphuc.order_service.kafka.event.dto.order.FlashSaleOrderItem;
 import lombok.*;
 
-import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -11,10 +10,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FlashSaleOrderCreatedEvent {
+public class CreateFlashSaleOrderCommand {
     private String requestId;
     private String userId;
     private String campaignId;
-    private Instant createdAt;
     private List<FlashSaleOrderItem> items;
 }

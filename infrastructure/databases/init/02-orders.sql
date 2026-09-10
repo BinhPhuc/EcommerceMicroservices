@@ -77,3 +77,16 @@ CREATE TABLE IF NOT EXISTS order_item_snapshots (
     UNIQUE KEY uk_order_item_snapshots_order_item_id (order_item_id),  -- 1 order_item : 1 snapshot
     CONSTRAINT fk_order_item_snapshots_order_item_id FOREIGN KEY (order_item_id) REFERENCES order_items (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS order_outboxes (
+    id                  VARCHAR(36)  NOT NULL,
+    order_id            VARCHAR(36),
+    processed           BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_by          VARCHAR(36),
+    created_at          TIMESTAMP    NOT NULL,
+    last_modified_by    VARCHAR(36),
+    last_modified_at    TIMESTAMP    NOT NULL,
+    is_deleted          BOOLEAN      NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_order_outboxes_order_id FOREIGN KEY (order_id) REFERENCES orders (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -10,7 +10,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
 import java.math.BigDecimal;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +27,8 @@ import lombok.Setter;
 @Table(name = "seller_orders")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
+@Deprecated(forRemoval = true, since = "This entity is deprecated and will be removed in future " +
+        "versions. Please use the new order management system.")
 public class SellerOrder extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

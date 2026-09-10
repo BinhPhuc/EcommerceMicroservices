@@ -22,7 +22,7 @@ import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleItem;
 import com.binhphuc.flash_sale_service.repository.CampaignItemRepository;
 import com.binhphuc.flash_sale_service.repository.CampaignRepository;
 import com.binhphuc.flash_sale_service.schedule.dto.SoldStatus;
-import com.binhphuc.flash_sale_service.kafka.event.FlashSaleOrderCreatedEvent;
+import com.binhphuc.flash_sale_service.kafka.event.FlashSaleCreateOrderEvent;
 import com.binhphuc.flash_sale_service.kafka.event.dto.FlashSaleOrderItem;
 import com.binhphuc.flash_sale_service.service.FlashSaleService;
 import com.binhphuc.flash_sale_service.service.OrderReservationService;
@@ -204,9 +204,9 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 variantIdToCampaignItem, campaignId));
     }
 
-    private FlashSaleOrderCreatedEvent buildOrderCreatedEvent(List<OrderItem> orderItems,
-                                                              Map<String, CampaignItem> variantIdToCampaignItem,
-                                                              String campaignId) {
+    private FlashSaleCreateOrderEvent buildOrderCreatedEvent(List<OrderItem> orderItems,
+                                                             Map<String, CampaignItem> variantIdToCampaignItem,
+                                                             String campaignId) {
         UserContext userContext = UserContextHolder.getUserContext();
         if (userContext == null || !StringUtils.hasText(userContext.getRequestId())) {
             throw new BusinessException(HttpStatus.UNAUTHORIZED, "Missing user context");
@@ -224,12 +224,12 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                             .build();
                 })
                 .toList();
-        return FlashSaleOrderCreatedEvent
+        return FlashSaleCreateOrderEvent
                 .builder()
                 .requestId(userContext.getRequestId())
                 .userId(userContext.getUserId())
+                .username(userContext.getUsername())
                 .campaignId(campaignId)
-                .createdAt(Instant.now())
                 .items(items)
                 .build();
     }

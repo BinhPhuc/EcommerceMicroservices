@@ -27,8 +27,12 @@ public class OrderItem extends BaseEntity {
     @Column(length = 36)
     private String id;
 
+    @Deprecated(forRemoval = true)
     @Column(name = "seller_order_id", length = 36)
     private String sellerOrderId;
+
+    @Column(name = "order_id", length = 36)
+    private String orderId;
 
     @Column(name = "product_id", length = 36)
     private String productId;

@@ -9,6 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -18,5 +20,5 @@ public class CreateOrderResponse {
     private OrderStatus status;
 
     @JsonProperty("total_amount")
-    private Integer totalAmount;
+    private BigDecimal totalAmount;
 }

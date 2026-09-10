@@ -1,7 +1,7 @@
 package com.binhphuc.flash_sale_service.service.impl;
 
 import com.binhphuc.flash_sale_service.constant.OrderOutboxConstant;
-import com.binhphuc.flash_sale_service.kafka.event.FlashSaleOrderCreatedEvent;
+import com.binhphuc.flash_sale_service.kafka.event.FlashSaleCreateOrderEvent;
 import com.binhphuc.flash_sale_service.kafka.producer.FlashSaleOrderProducer;
 import com.binhphuc.flash_sale_service.service.OrderOutboxService;
 import com.binhphuc.flash_sale_service.service.OrderReservationService;
@@ -41,20 +41,22 @@ public class OrderOutboxServiceImpl implements OrderOutboxService {
                     ReadOffset.from("0"), OrderOutboxConstant.OUTBOX_CONSUMER_GROUP);
         } catch (DataAccessException e) {
             log.info("Consumer group {} already exists on stream {}",
-                    OrderOutboxConstant.OUTBOX_CONSUMER_GROUP, OrderOutboxConstant.OUTBOX_STREAM_KEY);
+                    OrderOutboxConstant.OUTBOX_CONSUMER_GROUP,
+                    OrderOutboxConstant.OUTBOX_STREAM_KEY);
         }
     }
 
     @Override
     public void relay(MapRecord<String, String, String> record) {
-        FlashSaleOrderCreatedEvent event = parseRecord(record);
+        FlashSaleCreateOrderEvent event = parseRecord(record);
         if (event == null) {
             acknowledge(record.getId());
             return;
         }
         try {
             flashSaleOrderProducer.sendFlashSaleOrderCreatedEvent(event)
-                    .get(OrderOutboxConstant.OUTBOX_SEND_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
+                    .get(OrderOutboxConstant.OUTBOX_SEND_TIMEOUT.toMillis(),
+                            TimeUnit.MILLISECONDS);
             acknowledge(record.getId());
             log.info("Relayed outbox record id: {} of request id: {}", record.getId(),
                     event.getRequestId());
@@ -107,7 +109,7 @@ public class OrderOutboxServiceImpl implements OrderOutboxService {
             acknowledge(recordId);
             return;
         }
-        FlashSaleOrderCreatedEvent event = parseRecord(records.get(0));
+        FlashSaleCreateOrderEvent event = parseRecord(records.get(0));
         if (event != null) {
             log.error("Outbox record id: {} of request id: {} exhausted {} delivery attempts, " +
                             "releasing reserved stock", recordId, event.getRequestId(),
@@ -126,10 +128,10 @@ public class OrderOutboxServiceImpl implements OrderOutboxService {
         return stringRedisTemplate.opsForStream();
     }
 
-    private FlashSaleOrderCreatedEvent parseRecord(MapRecord<String, String, String> record) {
+    private FlashSaleCreateOrderEvent parseRecord(MapRecord<String, String, String> record) {
         String payload = record.getValue().get(OrderOutboxConstant.OUTBOX_PAYLOAD_FIELD);
         try {
-            return objectMapper.readValue(payload, FlashSaleOrderCreatedEvent.class);
+            return objectMapper.readValue(payload, FlashSaleCreateOrderEvent.class);
         } catch (Exception e) {
             log.error("Failed to parse outbox record id: {}, payload: {}", record.getId(), payload
                     , e);
