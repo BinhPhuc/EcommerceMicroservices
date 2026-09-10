@@ -150,12 +150,13 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void createFlashSaleOrder(CreateFlashSaleOrderCommand createFlashSaleOrderCommand) {
+        String idempotencyKey = createFlashSaleOrderCommand.getRequestId();
         Order newOrder = Order
                 .builder()
                 .userId(createFlashSaleOrderCommand.getUserId())
                 .status(OrderStatus.PENDING)
-                .idempotencyKey(createFlashSaleOrderCommand.getRequestId())
-                .paymentMethod(PaymentMethod.COD) // TODO: hardcode rn
+                .idempotencyKey(idempotencyKey)
+                .paymentMethod(PaymentMethod.COD)
                 .build();
         Order savedOrder = orderRepository.save(newOrder);
         AtomicReference<BigDecimal> totalAmount = new AtomicReference<>(BigDecimal.ZERO);
@@ -171,7 +172,6 @@ public class OrderServiceImpl implements OrderService {
                 }).toList();
         savedOrder.setTotalAmount(totalAmount.get());
         orderItemRepository.saveAll(newOrderItems);
-        // TODO: for simple dont save to OrderSnapshot & OrderItemSnapshot rn
         OrderOutbox newOrderOutbox =
                 OrderOutbox.builder().orderId(savedOrder.getId()).processed(false).build();
         orderOutboxRepository.save(newOrderOutbox);
@@ -184,7 +184,7 @@ public class OrderServiceImpl implements OrderService {
         // TODO: getById cannot use by method in same class, need to refactor to use repository
         //  directly
         String orderId = changeOrderStatusCommand.getOrderId();
-        OrderStatus orderStatus = changeOrderStatusCommand.getOrderStatus();
+        OrderStatus orderStatus = changeOrderStatusCommand.getStatus();
         Order order = getById(orderId);
         order.setStatus(orderStatus);
         orderRepository.save(order);

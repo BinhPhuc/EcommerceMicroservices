@@ -31,7 +31,7 @@ public class ProductLockConsumer {
                 .changeOrderStatus(ChangeOrderStatusCommand
                         .builder()
                         .orderId(productLockedEvent.getOrderId())
-                        .orderStatus(OrderStatus.PREPARED)
+                        .status(OrderStatus.PREPARED)
                         .build());
     }
 }

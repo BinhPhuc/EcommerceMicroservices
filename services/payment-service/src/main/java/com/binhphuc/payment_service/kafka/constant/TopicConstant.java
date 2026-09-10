@@ -5,4 +5,5 @@ public final class TopicConstant {
     }
 
     public static final String PAYMENT_CHARGE_PAYMENT_TOPIC = "payment.charge-payment.v1";
+    public static final String PAYMENT_FAILED_TOPIC = "payment.payment-failed.v1";
 }

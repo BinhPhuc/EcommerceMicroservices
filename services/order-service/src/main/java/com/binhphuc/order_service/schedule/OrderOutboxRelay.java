@@ -25,11 +25,10 @@ public class OrderOutboxRelay {
     public void processOrderOutbox() {
         List<OrderOutbox> unProcessedOutbox = orderOutboxService.getListUnprocessedOrderOutbox();
         for (OrderOutbox outbox : unProcessedOutbox) {
-            String idempotencyKey = UUID.randomUUID().toString();
             ChargePaymentEvent chargePaymentEvent = ChargePaymentEvent
                     .builder()
                     .orderId(outbox.getOrderId())
-                    .idempotencyKey(idempotencyKey)
+                    .idempotencyKey(outbox.getId())
                     .build();
             CompletableFuture<SendResult<String, Object>> future =
                     chargePaymentProducer.chargePayment(chargePaymentEvent);
