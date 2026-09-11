@@ -10,6 +10,7 @@ import com.binhphuc.inventory_service.service.InventoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .builder()
                 .stock(request.getStock())
                 .variantId(request.getVariantId())
+                .reserveStock(0L)
                 .build();
         inventoryRepository.save(inventory);
     }
@@ -32,6 +34,9 @@ public class InventoryServiceImpl implements InventoryService {
     public List<GetStockByVariantIdsResponse> getStockByVariantId(GetStockByVariantIdsRequest request) {
         List<Inventory> inventories =
                 inventoryRepository.findByVariantIdIn(request.getVariantIds());
+        if (inventories.size() != request.getVariantIds().size()) {
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Some variantIds not found");
+        }
         return inventories.stream().map(inventory -> GetStockByVariantIdsResponse
                 .builder()
                 .variantId(inventory.getVariantId())
@@ -42,5 +47,11 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public Inventory getInventoryByVariantId(String variantId) {
         return inventoryRepository.findByVariantId(variantId).orElseThrow(() -> new BusinessException(HttpStatus.BAD_REQUEST, "VariantId not found"));
+    }
+
+    @Override
+    @Transactional
+    public void updateInventoryReserveStock(String variantId, Long reserveStock) {
+        inventoryRepository.updateReserveStockByVariantId(variantId, reserveStock);
     }
 }

@@ -13,7 +13,4 @@ import java.util.List;
 public class GetStockByVariantIdsRequest {
     @JsonProperty("variant_ids")
     private List<String> variantIds;
-
-    @JsonProperty("campaign_id")
-    private String campaignId;
 }

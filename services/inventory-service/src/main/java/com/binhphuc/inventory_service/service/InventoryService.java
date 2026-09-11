@@ -13,4 +13,6 @@ public interface InventoryService {
     List<GetStockByVariantIdsResponse> getStockByVariantId(GetStockByVariantIdsRequest variantId);
 
     Inventory getInventoryByVariantId(String variantId);
+
+    void updateInventoryReserveStock(String variantId, Long reserveStock);
 }

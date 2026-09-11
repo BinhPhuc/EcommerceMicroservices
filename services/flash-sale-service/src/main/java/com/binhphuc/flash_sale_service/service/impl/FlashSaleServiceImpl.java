@@ -86,7 +86,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
         createCampaignRequest.getItems().forEach(itemRequest -> variantIdToStock.put(itemRequest.getVariantId(),
                 itemRequest.getStock()));
         List<GetStockByVariantIdsResponse> stockResponse =
-                inventoryClient.getStockByVariantIds(GetStockByVariantIdsRequest.builder().variantIds(variantIdsList).campaignId(campaignId).build());
+                inventoryClient.getStockByVariantIds(GetStockByVariantIdsRequest.builder().variantIds(variantIdsList).build());
         stockResponse.forEach(stock -> {
             if (stock.getStock() < variantIdToStock.get(stock.getVariantId())) {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for " +

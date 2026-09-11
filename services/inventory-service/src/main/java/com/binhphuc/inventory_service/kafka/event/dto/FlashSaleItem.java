@@ -2,8 +2,6 @@ package com.binhphuc.inventory_service.kafka.event.dto;
 
 import lombok.*;
 
-import java.math.BigDecimal;
-
 @Getter
 @Setter
 @AllArgsConstructor
