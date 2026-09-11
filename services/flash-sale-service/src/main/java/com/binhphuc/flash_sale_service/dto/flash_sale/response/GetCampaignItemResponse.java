@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -29,4 +30,10 @@ public class GetCampaignItemResponse {
 
     @JsonProperty("sold_quantity")
     private Long soldQuantity;
+
+    private String productName;
+
+    private String description;
+
+    private Map<String, String> variants;
 }

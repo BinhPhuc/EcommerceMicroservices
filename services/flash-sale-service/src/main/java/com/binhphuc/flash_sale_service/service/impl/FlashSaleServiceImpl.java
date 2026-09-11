@@ -8,6 +8,7 @@ import com.binhphuc.flash_sale_service.client.inventory.dto.request.GetStockByVa
 import com.binhphuc.flash_sale_service.client.inventory.dto.response.GetStockByVariantIdsResponse;
 import com.binhphuc.flash_sale_service.client.product.ProductClient;
 import com.binhphuc.flash_sale_service.client.product.dto.request.GetFlashSaleItemRequest;
+import com.binhphuc.flash_sale_service.client.product.dto.response.GetProductResponse;
 import com.binhphuc.flash_sale_service.constant.PreWarmItemConstant;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignItemRequest;
 import com.binhphuc.flash_sale_service.dto.flash_sale.request.CreateCampaignRequest;
@@ -78,15 +79,6 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         itemRequest.getVariantId());
             }
         }
-        Campaign newCampaign = Campaign
-                .builder()
-                .name(createCampaignRequest.getName())
-                .description(createCampaignRequest.getDescription())
-                .startedAt(startedAt)
-                .endedAt(endedAt)
-                .build();
-        Campaign savedCampaign = campaignRepository.save(newCampaign);
-        String campaignId = savedCampaign.getId();
         List<String> variantIdsList = createCampaignRequest.getItems().stream()
                 .map(CreateCampaignItemRequest::getVariantId)
                 .toList();
@@ -101,6 +93,15 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         "variant id: " + stock.getVariantId());
             }
         });
+        Campaign newCampaign = Campaign
+                .builder()
+                .name(createCampaignRequest.getName())
+                .description(createCampaignRequest.getDescription())
+                .startedAt(startedAt)
+                .endedAt(endedAt)
+                .build();
+        Campaign savedCampaign = campaignRepository.save(newCampaign);
+        String campaignId = savedCampaign.getId();
         List<CampaignItem> campaignItemList =
                 createCampaignRequest.getItems().stream().map(itemRequest ->
                         CampaignItem
@@ -123,6 +124,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .builder()
                         .productId(itemRequest.getProductId())
                         .variantId(itemRequest.getVariantId())
+                        .stock(itemRequest.getStock())
                         .build()).toList();
         try {
             preWarmItemService.preWarmItem(startJobTime, flashSaleItems, campaignId);
@@ -154,11 +156,13 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .productId(campaignItem.getProductId())
                         .variantId(campaignItem.getVariantId())
                         .build()).toList();
-        GetFlashSaleItemRequest request = GetFlashSaleItemRequest
-                .builder()
-                .flashSaleItems(flashSaleItems)
-                .build();
-        productClient.getFlashSaleItems(request);
+        Map<String, GetProductResponse> productResponseMap = new HashMap<>();
+        List<GetProductResponse> productResponses =
+                productClient.getFlashSaleItems(GetFlashSaleItemRequest
+                        .builder()
+                        .flashSaleItems(flashSaleItems)
+                        .build());
+        productResponses.forEach(productResponse -> productResponseMap.put(productResponse.getProductId(), productResponse));
         return campaignItemRepository
                 .findByCampaignIdAndIsDeletedFalse(campaignId)
                 .stream()
@@ -170,6 +174,9 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                         .price(campaignItem.getPrice())
                         .stock(campaignItem.getStock())
                         .soldQuantity(campaignItem.getSoldQuantity())
+                        .productName(productResponseMap.get(campaignItem.getProductId()).getName())
+                        .description(productResponseMap.get(campaignItem.getProductId()).getDescription())
+                        .variants(productResponseMap.get(campaignItem.getProductId()).getVariants())
                         .build())
                 .toList();
     }

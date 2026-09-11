@@ -61,20 +61,25 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public CreateProductResponse create(CreateProductRequest productRequest) {
         if (!categoryRepository.existsByIdAndIsDeletedFalse(productRequest.getCategoryId())) {
-            throw new BusinessException(HttpStatus.NOT_FOUND, "Category not found with id: " + productRequest
-                    .getCategoryId());
+            throw new BusinessException(HttpStatus.NOT_FOUND,
+                    "Category not found with id: " + productRequest
+                            .getCategoryId());
         }
         if (productVariantRepository.existsBySkuAndIsDeletedFalse(productRequest.getVariant().getSku())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "Product variant with SKU already exists: " +
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Product variant with SKU " +
+                    "already exists: " +
                     productRequest.getVariant().getSku());
         }
-        long totalThumbnailCount = productRequest.getImages().stream().filter(productImage -> productImage.getIsThumbnail()).count();
+        long totalThumbnailCount =
+                productRequest.getImages().stream().filter(productImage -> productImage.getIsThumbnail()).count();
         if (totalThumbnailCount != 1) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "There must be exactly one thumbnail image");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "There must be exactly one " +
+                    "thumbnail image");
         }
         productRequest.getImages().forEach(productImage -> {
             if (productImage.getIsThumbnail() && productImage.getDisplayOrder() != 1) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Thumbnail image must have display order 1");
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Thumbnail image must have " +
+                        "display order 1");
             }
         });
         String sellerId = UserContextHolder.getUserContext().getUserId();
@@ -88,15 +93,16 @@ public class ProductServiceImpl implements ProductService {
                 .categoryId(productRequest.getCategoryId())
                 .build();
         Product savedProduct = productRepository.save(newProduct);
-        List<ProductImage> productImageList = productRequest.getImages().stream().map(productImage -> {
-            return ProductImage
-                    .builder()
-                    .productId(savedProduct.getId())
-                    .url(productImage.getUrl())
-                    .isThumbnail(productImage.getIsThumbnail())
-                    .displayOrder(productImage.getDisplayOrder())
-                    .build();
-        }).toList();
+        List<ProductImage> productImageList =
+                productRequest.getImages().stream().map(productImage -> {
+                    return ProductImage
+                            .builder()
+                            .productId(savedProduct.getId())
+                            .url(productImage.getUrl())
+                            .isThumbnail(productImage.getIsThumbnail())
+                            .displayOrder(productImage.getDisplayOrder())
+                            .build();
+                }).toList();
         productImageRepository.saveAll(productImageList);
         ProductVariant newProductVariant = ProductVariant
                 .builder()
@@ -121,7 +127,8 @@ public class ProductServiceImpl implements ProductService {
         }
         Product product = productRepository
                 .findById(productId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " +
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Product not " +
+                        "found with id: " +
                         productId));
         productCache.put(productId, product);
         return product;
@@ -151,8 +158,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Caching(cacheable = {
-            @Cacheable(cacheManager = "caffeineCacheManager", value = "products", key = "#getFlashSaleItemRequest.getCampaignId()"),
-            @Cacheable(cacheManager = "flashSaleRedisCacheManager", value = "products", key = "#getFlashSaleItemRequest.getCampaignId()")
+            @Cacheable(cacheManager = "caffeineCacheManager", value = "products", key =
+                    "#getFlashSaleItemRequest.getCampaignId()"),
+            @Cacheable(cacheManager = "flashSaleRedisCacheManager", value = "products", key =
+                    "#getFlashSaleItemRequest.getCampaignId()")
     })
     public List<GetProductResponse> getFlashSaleItems(GetFlashSaleItemRequest getFlashSaleItemRequest) {
         List<String> productIds = new ArrayList<>();
@@ -161,25 +170,22 @@ public class ProductServiceImpl implements ProductService {
             productIds.add(flashSaleItem.getProductId());
             variantIds.add(flashSaleItem.getVariantId());
         });
-        List<GetStockByVariantIdsResponse> getStockByVariantIdsResponses = inventoryClient.getStock(GetStockByVariantIdsRequest.builder().variantIds(variantIds).campaignId(getFlashSaleItemRequest.getCampaignId()).build());
         List<Product> products = productRepository.findByIdIn(productIds);
         List<ProductVariant> productVariants = productVariantRepository.findByIdIn(variantIds);
         // TODO: 1 product has only 1 variant, must change this later
         Map<String, ProductVariant> productIdToProductVariant = new HashMap<>();
-        Map<String, Long> variantIdToStock = new HashMap<>();
         productVariants.stream().forEach(productVariant ->
                 productIdToProductVariant.put(productVariant.getProductId(), productVariant));
-        getStockByVariantIdsResponses.forEach(response ->
-                variantIdToStock.put(response.getVariantId(), response.getStock()));
         return products.stream().map(product ->
                 GetProductResponse
                         .builder()
+                        .productId(product.getId())
+                        .variantId(productIdToProductVariant.get(product.getId()).getId())
                         .name(product.getName())
                         .description(product.getDescription())
                         .unitsSold(0L)
                         .sku(productIdToProductVariant.get(product.getId()).getSku())
                         .variants(productIdToProductVariant.get(product.getId()).getAttributes())
-                        .stock(variantIdToStock.get(productIdToProductVariant.get(product.getId()).getId()))
                         .build()
         ).toList();
     }
@@ -208,11 +214,13 @@ public class ProductServiceImpl implements ProductService {
         //     Map<String, Integer> productIdToQuantityMap = lockProductStockCommand
         //             .getOrderItems()
         //             .stream()
-        //             .collect(java.util.stream.Collectors.toMap(OrderItem::getProductId, OrderItem::getQuantity));
+        //             .collect(java.util.stream.Collectors.toMap(OrderItem::getProductId,
+        //             OrderItem::getQuantity));
         //     for (Product product : lockedProducts) {
         //         Integer quantityToLock = productIdToQuantityMap.get(product.getId());
         //         if (product.getStock() < quantityToLock) {
-        //             throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for product with id: " +
+        //             throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for
+        //             product with id: " +
         //                     product
         //                             .getId());
         //         }

@@ -27,6 +27,9 @@ public class Inventory extends BaseEntity {
     @Column(name = "variant_id", length = 36, unique = true)
     private String variantId;
 
+    @Column(name = "reserve_stock", nullable = false)
+    private Long reserveStock;
+
     @Column(nullable = false)
     private Long stock;
 }

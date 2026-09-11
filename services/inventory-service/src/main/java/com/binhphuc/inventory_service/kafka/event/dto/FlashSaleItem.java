@@ -1,6 +1,8 @@
-package com.binhphuc.flash_sale_service.kafka.event.dto;
+package com.binhphuc.inventory_service.kafka.event.dto;
 
 import lombok.*;
+
+import java.math.BigDecimal;
 
 @Getter
 @Setter

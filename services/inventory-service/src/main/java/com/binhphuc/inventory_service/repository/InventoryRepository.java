@@ -10,5 +10,6 @@ import java.util.Optional;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, String> {
     Optional<Inventory> findByVariantId(String variantId);
+
     List<Inventory> findByVariantIdIn(List<String> variantIds);
 }

@@ -21,10 +21,17 @@ public class GetProductResponse {
 
     private String sku;
 
-    // TODO: 1 product should have multiple variants, so we should change this to a list of variants
+    // TODO: 1 product should have multiple variants, so we should change this to a list of
+    //  variants
     private Map<String, String> variants;
 
     private BigDecimal price;
 
     private Long stock;
+
+    @JsonProperty("product_id")
+    private String productId;
+
+    @JsonProperty("variant_id")
+    private String variantId;
 }

@@ -46,7 +46,8 @@ public class PreWarmItemJob implements Job {
                     .variantId(item.getVariantId())
                     .soldOut(false)
                     .build();
-            String cacheKey = CacheHelper.createCacheKey(PreWarmItemConstant.SOLD_STATUS_PRIMARY_CACHE_KEY,
+            String cacheKey =
+                    CacheHelper.createCacheKey(PreWarmItemConstant.SOLD_STATUS_PRIMARY_CACHE_KEY,
                     List.of(item.getVariantId()));
             cache.put(cacheKey, soldStatus);
         });
