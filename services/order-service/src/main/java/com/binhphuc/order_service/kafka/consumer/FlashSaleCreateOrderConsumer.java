@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class FlashSaleOrderConsumer {
+public class FlashSaleCreateOrderConsumer {
     private final OrderService orderService;
 
     @KafkaListener(topics = TopicConstant.FLASH_SALE_CREATE_ORDER_TOPIC)

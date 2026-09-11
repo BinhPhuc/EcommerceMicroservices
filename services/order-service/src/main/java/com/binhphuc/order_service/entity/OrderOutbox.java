@@ -30,6 +30,9 @@ public class OrderOutbox extends BaseEntity {
     @Column(name = "order_id", length = 36)
     private String orderId;
 
+    @Column(name = "campaign_id", length = 36)
+    private String campaignId;
+
     @Column(name = "processed")
     private Boolean processed;
 }

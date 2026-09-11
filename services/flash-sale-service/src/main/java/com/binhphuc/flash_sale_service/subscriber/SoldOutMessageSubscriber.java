@@ -35,13 +35,20 @@ public class SoldOutMessageSubscriber implements MessageListener {
             return;
         }
         log.info("Received sold out message: {}", soldStatus);
-        if (soldStatus.isSoldOut()) {
-            Cache cache = cacheManager.getCache(PreWarmItemConstant.SOLD_STATUS_CACHE_NAME);
-            String cacheKey =
-                    CacheHelper.createCacheKey(PreWarmItemConstant.SOLD_STATUS_PRIMARY_CACHE_KEY,
-                            List.of(soldStatus.getVariantId()));
-            cache.put(cacheKey, soldStatus);
+        Cache cache = cacheManager.getCache(PreWarmItemConstant.SOLD_STATUS_CACHE_NAME);
+        if (cache == null) {
+            log.error("Cache {} is not configured, cannot apply sold status of variant id: {}",
+                    PreWarmItemConstant.SOLD_STATUS_CACHE_NAME, soldStatus.getVariantId());
+            return;
         }
+        String cacheKey =
+                CacheHelper.createCacheKey(PreWarmItemConstant.SOLD_STATUS_PRIMARY_CACHE_KEY,
+                        List.of(soldStatus.getVariantId()));
+        if (soldStatus.isSoldOut()) {
+            cache.put(cacheKey, soldStatus);
+            return;
+        }
+        cache.evict(cacheKey);
     }
 
     private SoldStatus parseMessage(String message) {

@@ -21,8 +21,12 @@ public class ChargePaymentServiceImpl implements ChargePaymentService {
     public void chargePayment(ChargePaymentCommand command) {
         boolean isError = false;
         if (isError) {
-            PaymentFailedEvent event =
-                    PaymentFailedEvent.builder().orderId(command.getOrderId()).build();
+            PaymentFailedEvent event = PaymentFailedEvent.builder()
+                    .orderId(command.getOrderId())
+                    .idempotencyKey(command.getIdempotencyKey())
+                    .campaignId(command.getCampaignId())
+                    .items(command.getItems())
+                    .build();
             paymentFailedProducer.sendPaymentFailedEvent(event);
         } else {
             if (processedEventRepository.existsByIdempotencyKey(command.getIdempotencyKey())) {

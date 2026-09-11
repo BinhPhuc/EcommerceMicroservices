@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 public class PaymentFailedConsumer {
     private final OrderService orderService;
 
-    @KafkaListener(topics = TopicConstant.FLASH_SALE_CREATE_ORDER_TOPIC)
+    @KafkaListener(topics = TopicConstant.PAYMENT_FAILED_TOPIC)
     @RetryableTopic(
             attempts = "4",
             backOff = @BackOff(delay = 2000, multiplier = 2)

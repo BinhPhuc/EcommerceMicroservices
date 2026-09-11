@@ -1,6 +1,6 @@
-package com.binhphuc.payment_service.kafka.event;
+package com.binhphuc.flash_sale_service.kafka.command;
 
-import com.binhphuc.payment_service.kafka.event.dto.StockItem;
+import com.binhphuc.flash_sale_service.kafka.event.dto.StockItem;
 import lombok.*;
 
 import java.util.List;
@@ -10,8 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ChargePaymentEvent {
-    private String orderId;
+public class ReleaseStockCommand {
     private String idempotencyKey;
     private String campaignId;
     private List<StockItem> items;

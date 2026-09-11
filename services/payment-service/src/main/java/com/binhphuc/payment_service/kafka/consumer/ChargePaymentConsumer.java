@@ -21,8 +21,12 @@ public class ChargePaymentConsumer {
             backOff = @BackOff(delay = 2000, multiplier = 2)
     )
     public void chargePayment(ChargePaymentEvent event) {
-        ChargePaymentCommand command =
-                ChargePaymentCommand.builder().idempotencyKey(event.getIdempotencyKey()).build();
+        ChargePaymentCommand command = ChargePaymentCommand.builder()
+                .orderId(event.getOrderId())
+                .idempotencyKey(event.getIdempotencyKey())
+                .campaignId(event.getCampaignId())
+                .items(event.getItems())
+                .build();
         chargePaymentService.chargePayment(command);
     }
 }

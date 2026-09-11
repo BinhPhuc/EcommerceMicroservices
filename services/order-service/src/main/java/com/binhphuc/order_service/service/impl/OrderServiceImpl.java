@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 
 import com.binhphuc.common_core.context.holder.UserContextHolder;
 import com.binhphuc.order_service.entity.OrderOutbox;
+import com.binhphuc.order_service.entity.OrderOutboxVariant;
 import com.binhphuc.order_service.enums.PaymentMethod;
 import com.binhphuc.order_service.kafka.command.ChangeOrderStatusCommand;
 import com.binhphuc.order_service.kafka.command.CreateFlashSaleOrderCommand;
 import com.binhphuc.order_service.repository.OrderOutboxRepository;
+import com.binhphuc.order_service.repository.OrderOutboxVariantRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -46,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
     private final ProductClient productClient;
     private final OrderEventProducer orderEventProducer;
     private final OrderOutboxRepository orderOutboxRepository;
+    private final OrderOutboxVariantRepository orderOutboxVariantRepository;
 
     @Override
     @Cacheable(value = "orders", key = "#orderId")
@@ -172,9 +175,22 @@ public class OrderServiceImpl implements OrderService {
                 }).toList();
         savedOrder.setTotalAmount(totalAmount.get());
         orderItemRepository.saveAll(newOrderItems);
-        OrderOutbox newOrderOutbox =
-                OrderOutbox.builder().orderId(savedOrder.getId()).processed(false).build();
+        OrderOutbox newOrderOutbox = OrderOutbox
+                .builder()
+                .orderId(savedOrder.getId())
+                .campaignId(createFlashSaleOrderCommand.getCampaignId())
+                .processed(false)
+                .build();
         orderOutboxRepository.save(newOrderOutbox);
+        List<OrderOutboxVariant> newOrderOutboxVariants =
+                createFlashSaleOrderCommand.getItems().stream().map(item ->
+                        OrderOutboxVariant.builder()
+                                .outboxId(newOrderOutbox.getId())
+                                .variantId(item.getVariantId())
+                                .quantity(item.getQuantity())
+                                .build()
+                ).toList();
+        orderOutboxVariantRepository.saveAll(newOrderOutboxVariants);
     }
 
     @Override
