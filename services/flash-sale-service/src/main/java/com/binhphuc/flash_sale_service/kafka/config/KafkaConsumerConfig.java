@@ -1,7 +1,6 @@
-package com.binhphuc.payment_service.kafka.config;
+package com.binhphuc.flash_sale_service.kafka.config;
 
-import java.util.Map;
-
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.ByteArraySerializer;
 import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
@@ -16,7 +15,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.retrytopic.RetryTopicBeanNames;
 import org.springframework.kafka.support.converter.ByteArrayJacksonJsonMessageConverter;
 
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
 
 @EnableKafka
 @Configuration

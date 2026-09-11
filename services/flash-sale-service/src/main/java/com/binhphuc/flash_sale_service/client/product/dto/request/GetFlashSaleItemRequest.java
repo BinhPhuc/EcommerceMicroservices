@@ -13,4 +13,7 @@ import java.util.List;
 public class GetFlashSaleItemRequest {
     @JsonProperty("flash_sale_items")
     List<FlashSaleItem> flashSaleItems;
+
+    @JsonProperty("campaign_id")
+    private String campaignId;
 }

@@ -161,6 +161,7 @@ public class FlashSaleServiceImpl implements FlashSaleService {
                 productClient.getFlashSaleItems(GetFlashSaleItemRequest
                         .builder()
                         .flashSaleItems(flashSaleItems)
+                        .campaignId(campaignId)
                         .build());
         productResponses.forEach(productResponse -> productResponseMap.put(productResponse.getProductId(), productResponse));
         return campaignItemRepository

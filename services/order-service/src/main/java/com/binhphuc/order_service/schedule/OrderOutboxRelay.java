@@ -26,7 +26,7 @@ public class OrderOutboxRelay {
     private final OrderOutboxService orderOutboxService;
     private final OrderOutboxVariantService orderOutboxVariantService;
 
-    @Scheduled(fixedDelayString = "${order.outbox.relay-delay}:10000")
+    @Scheduled(fixedDelayString = "${order.outbox.relay-delay:10000}")
     public void processOrderOutbox() {
         List<OrderOutbox> unProcessedOutbox = orderOutboxService.getListUnprocessedOrderOutbox();
         for (OrderOutbox outbox : unProcessedOutbox) {
