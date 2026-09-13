@@ -22,19 +22,19 @@ services:
     networks:
       - ecom-net
 
-  # kafka-ui:
-  #   image: provectuslabs/kafka-ui:latest
-  #   container_name: kafka-ui
-  #   restart: always
-  #   environment:
-  #     KAFKA_CLUSTERS_0_NAME: local
-  #     KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:9092
-  #   ports:
-  #     - "8081:8080"
-  #   depends_on:
-  #     - broker
-  #   networks:
-  #     - ecom-net
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    restart: always
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker:9092
+    ports:
+      - "8081:8080"
+    depends_on:
+      - broker
+    networks:
+      - ecom-net
 
   redis-server:
     image: redis:8.4-alpine
