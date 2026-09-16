@@ -10,5 +10,5 @@ import lombok.*;
 @Builder
 public class ChangeOrderStatusCommand {
     private String orderId;
-    private OrderStatus orderStatus;
+    private OrderStatus status;
 }

@@ -4,6 +4,7 @@ import java.util.Collections;
 
 import org.keycloak.admin.client.CreatedResponseUtil;
 import org.keycloak.admin.client.Keycloak;
+import org.keycloak.admin.client.resource.ClientResource;
 import org.keycloak.admin.client.resource.RealmResource;
 import org.keycloak.admin.client.resource.UserResource;
 import org.keycloak.admin.client.resource.UsersResource;
@@ -60,7 +61,10 @@ public class UserServiceImpl implements UserService {
         user.setCredentials(Collections.singletonList(credentialRepresentation));
 
         RealmResource realmResource = keycloak.realm(realm);
+        String clientUuid = realmResource.clients().findByClientId(clientId).getFirst().getId();
+        ClientResource clientResource = realmResource.clients().get(clientUuid);
         UsersResource usersResource = realmResource.users();
+        RoleRepresentation roleRepresentation = clientResource.roles().get(registrationRequest.getRole()).toRepresentation();
         Response response = usersResource.create(user);
 
         if (response == null) {
@@ -68,7 +72,6 @@ public class UserServiceImpl implements UserService {
         }
 
         int statusCode = response.getStatus();
-
         if (statusCode != 201) {
             ErrorRepresentation errorRepresentation = response.readEntity(ErrorRepresentation.class);
             String errorMessage = errorRepresentation != null ? errorRepresentation.getErrorMessage() : "Unknown error";
@@ -77,11 +80,7 @@ public class UserServiceImpl implements UserService {
 
         String userId = CreatedResponseUtil.getCreatedId(response);
         UserResource newUser = keycloak.realm(realm).users().get(userId);
-        RoleRepresentation roleRepresentation = realmResource
-                .roles()
-                .get(registrationRequest.getRole())
-                .toRepresentation();
-        newUser.roles().realmLevel().add(Collections.singletonList(roleRepresentation));
+        newUser.roles().clientLevel(clientUuid).add(Collections.singletonList(roleRepresentation));
 
         response.close();
     }
