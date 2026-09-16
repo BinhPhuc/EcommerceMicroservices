@@ -31,5 +31,6 @@ public class OrderSnapshot extends BaseEntity {
     private String orderId;
 
     @Column(name = "shipping_address")
+    // TODO: get from user service, will be done later
     private String shippingAddress;
 }

@@ -1,12 +1,7 @@
 package com.binhphuc.inventory_service.entity;
 
 import com.binhphuc.common_jpa_starter.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +13,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-@Table(name = "inventories")
+@Table(name = "inventories", indexes = {
+        @Index(name = "idx_inventory_variant", columnList = "variant_id", unique = true)
+})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Inventory extends BaseEntity {
@@ -29,6 +26,9 @@ public class Inventory extends BaseEntity {
 
     @Column(name = "variant_id", length = 36, unique = true)
     private String variantId;
+
+    @Column(name = "reserve_stock", nullable = false)
+    private Long reserveStock;
 
     @Column(nullable = false)
     private Long stock;

@@ -19,6 +19,10 @@ public class CreateOrderItemRequest {
     @JsonProperty("product_id")
     private String productId;
 
+    @NotEmpty
+    @JsonProperty("variant_id")
+    private String variantId;
+
     @NotNull
     @Positive
     private Integer quantity;

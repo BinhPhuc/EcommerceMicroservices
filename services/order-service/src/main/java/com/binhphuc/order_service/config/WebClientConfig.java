@@ -7,11 +7,13 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.reactive.DeferringLoadBalancerExchangeFilterFunction;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import reactor.netty.http.client.HttpClient;
@@ -25,7 +27,8 @@ public class WebClientConfig {
     private Duration productTimeout;
 
     @Bean
-    public WebClient productClient(DeferringLoadBalancerExchangeFilterFunction<?> loadBalancerFilter) {
+    public WebClient productClient(DeferringLoadBalancerExchangeFilterFunction<?> loadBalancerFilter,
+            @Qualifier("userContextPropagationFilter") ExchangeFilterFunction userContextPropagationFilter) {
         HttpClient httpClient = HttpClient
                 .create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 5000)
@@ -39,6 +42,7 @@ public class WebClientConfig {
                 .baseUrl(productBaseUrl)
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .filter(loadBalancerFilter)
+                .filter(userContextPropagationFilter)
                 .build();
     }
 }

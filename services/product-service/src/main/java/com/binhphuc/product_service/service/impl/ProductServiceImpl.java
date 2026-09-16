@@ -3,15 +3,17 @@ package com.binhphuc.product_service.service.impl;
 import com.binhphuc.common_web_starter.exception.BusinessException;
 import com.binhphuc.product_service.client.inventory.InventoryClient;
 import com.binhphuc.product_service.client.inventory.dto.request.CreateProductStockRequest;
-import com.binhphuc.product_service.context.holder.UserContextHolder;
+import com.binhphuc.common_core.context.holder.UserContextHolder;
+import com.binhphuc.product_service.client.inventory.dto.request.GetStockByVariantIdsRequest;
+import com.binhphuc.product_service.client.inventory.dto.response.GetStockByVariantIdsResponse;
 import com.binhphuc.product_service.dto.product.request.CreateProductRequest;
+import com.binhphuc.product_service.dto.product.request.GetFlashSaleItemRequest;
 import com.binhphuc.product_service.dto.product.request.GetProductByIdsRequest;
 import com.binhphuc.product_service.dto.product.response.CreateProductResponse;
-import com.binhphuc.product_service.dto.product.response.GetProductByIdsResponse;
+import com.binhphuc.product_service.dto.product.response.GetProductResponse;
 import com.binhphuc.product_service.entity.Product;
 import com.binhphuc.product_service.entity.ProductImage;
 import com.binhphuc.product_service.entity.ProductVariant;
-import com.binhphuc.product_service.kafka.event.ProductLockedEvent;
 import com.binhphuc.product_service.kafka.event.dto.order.OrderItem;
 import com.binhphuc.product_service.kafka.command.LockProductStockCommand;
 import com.binhphuc.product_service.kafka.producer.ProductEventProducer;
@@ -22,10 +24,9 @@ import com.binhphuc.product_service.repository.ProductVariantRepository;
 import com.binhphuc.product_service.service.ProductService;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,8 @@ import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.Cache;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -58,20 +61,25 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public CreateProductResponse create(CreateProductRequest productRequest) {
         if (!categoryRepository.existsByIdAndIsDeletedFalse(productRequest.getCategoryId())) {
-            throw new BusinessException(HttpStatus.NOT_FOUND, "Category not found with id: " + productRequest
-                    .getCategoryId());
+            throw new BusinessException(HttpStatus.NOT_FOUND,
+                    "Category not found with id: " + productRequest
+                            .getCategoryId());
         }
         if (productVariantRepository.existsBySkuAndIsDeletedFalse(productRequest.getVariant().getSku())) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "Product variant with SKU already exists: " +
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "Product variant with SKU " +
+                    "already exists: " +
                     productRequest.getVariant().getSku());
         }
-        long totalThumbnailCount = productRequest.getImages().stream().filter(productImage -> productImage.getIsThumbnail()).count();
+        long totalThumbnailCount =
+                productRequest.getImages().stream().filter(productImage -> productImage.getIsThumbnail()).count();
         if (totalThumbnailCount != 1) {
-            throw new BusinessException(HttpStatus.BAD_REQUEST, "There must be exactly one thumbnail image");
+            throw new BusinessException(HttpStatus.BAD_REQUEST, "There must be exactly one " +
+                    "thumbnail image");
         }
         productRequest.getImages().forEach(productImage -> {
             if (productImage.getIsThumbnail() && productImage.getDisplayOrder() != 1) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Thumbnail image must have display order 1");
+                throw new BusinessException(HttpStatus.BAD_REQUEST, "Thumbnail image must have " +
+                        "display order 1");
             }
         });
         String sellerId = UserContextHolder.getUserContext().getUserId();
@@ -85,16 +93,16 @@ public class ProductServiceImpl implements ProductService {
                 .categoryId(productRequest.getCategoryId())
                 .build();
         Product savedProduct = productRepository.save(newProduct);
-        List<ProductImage> productImageList = productRequest.getImages().stream().map(productImage -> {
-            ProductImage newProductImage = ProductImage
-                    .builder()
-                    .productId(savedProduct.getId())
-                    .url(productImage.getUrl())
-                    .isThumbnail(productImage.getIsThumbnail())
-                    .displayOrder(productImage.getDisplayOrder())
-                    .build();
-            return newProductImage;
-        }).toList();
+        List<ProductImage> productImageList =
+                productRequest.getImages().stream().map(productImage -> {
+                    return ProductImage
+                            .builder()
+                            .productId(savedProduct.getId())
+                            .url(productImage.getUrl())
+                            .isThumbnail(productImage.getIsThumbnail())
+                            .displayOrder(productImage.getDisplayOrder())
+                            .build();
+                }).toList();
         productImageRepository.saveAll(productImageList);
         ProductVariant newProductVariant = ProductVariant
                 .builder()
@@ -119,14 +127,15 @@ public class ProductServiceImpl implements ProductService {
         }
         Product product = productRepository
                 .findById(productId)
-                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Product not found with id: " +
+                .orElseThrow(() -> new BusinessException(HttpStatus.NOT_FOUND, "Product not " +
+                        "found with id: " +
                         productId));
         productCache.put(productId, product);
         return product;
     }
 
     @Override
-    public List<GetProductByIdsResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest) {
+    public List<GetProductResponse> getProductByIds(GetProductByIdsRequest getProductByIdsRequest) {
         List<Product> products = new ArrayList<>();
         for (String productId : getProductByIdsRequest.getProductIds()) {
             Product product = cacheProductById(productId);
@@ -145,6 +154,40 @@ public class ProductServiceImpl implements ProductService {
         //                 .build())
         //         .toList();
         return List.of();
+    }
+
+    @Override
+    @Caching(cacheable = {
+            @Cacheable(cacheManager = "caffeineCacheManager", value = "products", key =
+                    "#getFlashSaleItemRequest.getCampaignId()"),
+            @Cacheable(cacheManager = "flashSaleRedisCacheManager", value = "products", key =
+                    "#getFlashSaleItemRequest.getCampaignId()")
+    })
+    public List<GetProductResponse> getFlashSaleItems(GetFlashSaleItemRequest getFlashSaleItemRequest) {
+        List<String> productIds = new ArrayList<>();
+        List<String> variantIds = new ArrayList<>();
+        getFlashSaleItemRequest.getFlashSaleItems().forEach(flashSaleItem -> {
+            productIds.add(flashSaleItem.getProductId());
+            variantIds.add(flashSaleItem.getVariantId());
+        });
+        List<Product> products = productRepository.findByIdIn(productIds);
+        List<ProductVariant> productVariants = productVariantRepository.findByIdIn(variantIds);
+        // TODO: 1 product has only 1 variant, must change this later
+        Map<String, ProductVariant> productIdToProductVariant = new HashMap<>();
+        productVariants.stream().forEach(productVariant ->
+                productIdToProductVariant.put(productVariant.getProductId(), productVariant));
+        return products.stream().map(product ->
+                GetProductResponse
+                        .builder()
+                        .productId(product.getId())
+                        .variantId(productIdToProductVariant.get(product.getId()).getId())
+                        .name(product.getName())
+                        .description(product.getDescription())
+                        .unitsSold(0L)
+                        .sku(productIdToProductVariant.get(product.getId()).getSku())
+                        .variants(productIdToProductVariant.get(product.getId()).getAttributes())
+                        .build()
+        ).toList();
     }
 
     @Override
@@ -171,11 +214,13 @@ public class ProductServiceImpl implements ProductService {
         //     Map<String, Integer> productIdToQuantityMap = lockProductStockCommand
         //             .getOrderItems()
         //             .stream()
-        //             .collect(java.util.stream.Collectors.toMap(OrderItem::getProductId, OrderItem::getQuantity));
+        //             .collect(java.util.stream.Collectors.toMap(OrderItem::getProductId,
+        //             OrderItem::getQuantity));
         //     for (Product product : lockedProducts) {
         //         Integer quantityToLock = productIdToQuantityMap.get(product.getId());
         //         if (product.getStock() < quantityToLock) {
-        //             throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for product with id: " +
+        //             throw new BusinessException(HttpStatus.BAD_REQUEST, "Not enough stock for
+        //             product with id: " +
         //                     product
         //                             .getId());
         //         }

@@ -1,12 +1,21 @@
 package com.binhphuc.order_service.service.impl;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import com.binhphuc.common_core.context.holder.UserContextHolder;
+import com.binhphuc.order_service.entity.OrderOutbox;
+import com.binhphuc.order_service.entity.OrderOutboxVariant;
+import com.binhphuc.order_service.enums.PaymentMethod;
 import com.binhphuc.order_service.kafka.command.ChangeOrderStatusCommand;
+import com.binhphuc.order_service.kafka.command.CreateFlashSaleOrderCommand;
+import com.binhphuc.order_service.repository.OrderOutboxRepository;
+import com.binhphuc.order_service.repository.OrderOutboxVariantRepository;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
@@ -38,17 +47,21 @@ public class OrderServiceImpl implements OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ProductClient productClient;
     private final OrderEventProducer orderEventProducer;
+    private final OrderOutboxRepository orderOutboxRepository;
+    private final OrderOutboxVariantRepository orderOutboxVariantRepository;
 
     @Override
     @Cacheable(value = "orders", key = "#orderId")
     public Order getById(String orderId) {
         Optional<Order> orderOptional = orderRepository.findById(orderId);
         if (!orderOptional.isPresent()) {
-            throw new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId + " not found");
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId + " not" +
+                    " found");
         }
         Order order = orderOptional.get();
         if (order.getIsDeleted()) {
-            throw new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId + " not found");
+            throw new BusinessException(HttpStatus.NOT_FOUND, "Order with id " + orderId + " not" +
+                    " found");
         }
         return order;
     }
@@ -56,6 +69,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest createOrderRequest) {
+        // TODO: check logic again
         List<String> productIds = createOrderRequest
                 .getOrderItems()
                 .stream()
@@ -68,10 +82,12 @@ public class OrderServiceImpl implements OrderService {
                 .stream()
                 .collect(Collectors.toMap(GetProductByIdsResponse::getId, product -> product));
 
-        Order newOrder = new Order();
-        newOrder.setStatus(OrderStatus.PENDING);
-        newOrder.setCustomerId(createOrderRequest.getCustomerId());
-        newOrder.setTotalAmount(0);
+        Order newOrder = Order
+                .builder()
+                .status(OrderStatus.PENDING)
+                .userId(UserContextHolder.getUserContext().getUserId())
+                .totalAmount(BigDecimal.valueOf(0))
+                .build();
         Order savedOrder = orderRepository.save(newOrder);
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -83,37 +99,35 @@ public class OrderServiceImpl implements OrderService {
                 throw new BusinessException(HttpStatus.BAD_REQUEST, "Product with id " +
                         orderItemRequest.getProductId() + " not found");
             }
-
+            String productId = product.getId();
             Integer quantity = orderItemRequest.getQuantity();
             Integer stock = product.getStock();
-
+            String variantId = orderItemRequest.getVariantId();
             if (stock < quantity) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
-                        " is out of stock");
+                throw new BusinessException(HttpStatus.BAD_REQUEST,
+                        "Product " + product.getName() +
+                                " is out of stock");
             }
-
             Integer price = product.getPrice();
             if (price == null) {
-                throw new BusinessException(HttpStatus.BAD_REQUEST, "Product " + product.getName() +
-                        " has no price");
+                throw new BusinessException(HttpStatus.BAD_REQUEST,
+                        "Product " + product.getName() +
+                                " has no price");
             }
-
             totalAmount += quantity * price;
-
-            com.binhphuc.order_service.entity.OrderItem newOrderItem = com.binhphuc.order_service.entity.OrderItem
-                    .builder()
-                    .orderId(savedOrder.getId())
-                    .productId(product.getId())
-                    .quantity(quantity)
-                    .price(price)
-                    .build();
+            com.binhphuc.order_service.entity.OrderItem newOrderItem =
+                    com.binhphuc.order_service.entity.OrderItem
+                            .builder()
+                            .productId(productId)
+                            .quantity(quantity)
+                            .variantId(variantId)
+                            .quantity(quantity)
+                            .build();
             orderItems.add(newOrderItem);
         }
-
-        savedOrder.setTotalAmount(totalAmount);
+        savedOrder.setTotalAmount(BigDecimal.valueOf(totalAmount));
         orderRepository.save(savedOrder);
         orderItemRepository.saveAll(orderItems);
-
         orderEventProducer
                 .sendOrderCreatedEvent(OrderCreatedEvent
                         .builder()
@@ -138,10 +152,55 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+    public void createFlashSaleOrder(CreateFlashSaleOrderCommand createFlashSaleOrderCommand) {
+        String idempotencyKey = createFlashSaleOrderCommand.getRequestId();
+        Order newOrder = Order
+                .builder()
+                .userId(createFlashSaleOrderCommand.getUserId())
+                .status(OrderStatus.PENDING)
+                .idempotencyKey(idempotencyKey)
+                .paymentMethod(PaymentMethod.COD)
+                .build();
+        Order savedOrder = orderRepository.save(newOrder);
+        AtomicReference<BigDecimal> totalAmount = new AtomicReference<>(BigDecimal.ZERO);
+        List<OrderItem> newOrderItems =
+                createFlashSaleOrderCommand.getItems().stream().map(item -> {
+                    totalAmount.updateAndGet(v -> v.add(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()))));
+                    return OrderItem.builder()
+                            .productId(item.getProductId())
+                            .variantId(item.getVariantId())
+                            .quantity(item.getQuantity())
+                            .orderId(savedOrder.getId())
+                            .build();
+                }).toList();
+        savedOrder.setTotalAmount(totalAmount.get());
+        orderItemRepository.saveAll(newOrderItems);
+        OrderOutbox newOrderOutbox = OrderOutbox
+                .builder()
+                .orderId(savedOrder.getId())
+                .campaignId(createFlashSaleOrderCommand.getCampaignId())
+                .processed(false)
+                .build();
+        orderOutboxRepository.save(newOrderOutbox);
+        List<OrderOutboxVariant> newOrderOutboxVariants =
+                createFlashSaleOrderCommand.getItems().stream().map(item ->
+                        OrderOutboxVariant.builder()
+                                .outboxId(newOrderOutbox.getId())
+                                .variantId(item.getVariantId())
+                                .quantity(item.getQuantity())
+                                .build()
+                ).toList();
+        orderOutboxVariantRepository.saveAll(newOrderOutboxVariants);
+    }
+
+    @Override
+    @Transactional
     @CacheEvict(value = "orders", key = "#changeOrderStatusCommand.orderId")
     public void changeOrderStatus(ChangeOrderStatusCommand changeOrderStatusCommand) {
+        // TODO: getById cannot use by method in same class, need to refactor to use repository
+        //  directly
         String orderId = changeOrderStatusCommand.getOrderId();
-        OrderStatus orderStatus = changeOrderStatusCommand.getOrderStatus();
+        OrderStatus orderStatus = changeOrderStatusCommand.getStatus();
         Order order = getById(orderId);
         order.setStatus(orderStatus);
         orderRepository.save(order);
